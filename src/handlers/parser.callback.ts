@@ -3,14 +3,14 @@ import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.a
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 
 async function parserCallback(ctx: Context) {
-  console.log("In parser callback");
-
   if (!ctx.message || !("text" in ctx.message)) return;
   if (ctx.session.state !== "parser_action") return;
-  if (!ctx.message.reply_to_message || ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id || !ctx.from?.id)
+  if (
+    !ctx.message.reply_to_message ||
+    ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id ||
+    !ctx.from?.id
+  )
     return;
-
-  console.log("Got here");
 
   if ("text" in ctx.message.reply_to_message) {
     try {
@@ -18,7 +18,9 @@ async function parserCallback(ctx: Context) {
       const [parser] = ctx.session.parser_action!.split(":") as [Parser];
 
       if (parser === "regex") {
-        const { msg, error } = await HSTAPI.post<Res>("/regex/add", { pattern: text });
+        const { msg, error } = await HSTAPI.post<Res>("/regex/add", {
+          pattern: text,
+        });
         await ctx.reply(msg || error || "Shouldn't happen!");
       } else if (parser === "llm") {
         const res = await HSTAPI.post<Res>("/prompt/set", { prompt: text });
@@ -38,7 +40,12 @@ async function parserCallback(ctx: Context) {
 }
 
 async function removeRegexCallback(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery) || !ctx.callbackQuery.data) return;
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
 
   try {
     const [, encoded] = ctx.callbackQuery.data.split(":");
@@ -47,7 +54,9 @@ async function removeRegexCallback(ctx: Context) {
     await ctx.answerCbQuery();
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
-    const { error, msg } = await HSTAPI.delete<Res>("regex/remove", { pattern });
+    const { error, msg } = await HSTAPI.delete<Res>("regex/remove", {
+      pattern,
+    });
     await ctx.reply(msg || error || "Shouldn't happen!");
   } catch (error) {
     console.error(error);

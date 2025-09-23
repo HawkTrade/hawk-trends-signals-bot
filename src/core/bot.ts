@@ -6,8 +6,15 @@ import type { FastifyInstance } from "fastify";
 import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../handlers/start.command";
 import botCommands from "../handlers/commands";
-import { addSourceHandler, getSourceHandler, removeSourceHandler } from "../handlers/source.command";
-import { selectSourceCallback, sourceCallback } from "../handlers/source.callback";
+import {
+  addSourceHandler,
+  getSourceHandler,
+  removeSourceHandler,
+} from "../handlers/source.command";
+import {
+  selectSourceCallback,
+  sourceCallback,
+} from "../handlers/source.callback";
 import {
   addRegexHandler,
   getPromptsHandler,
@@ -15,11 +22,14 @@ import {
   removeRegexHandler,
   setPromptHandler,
 } from "../handlers/parser.command";
-import { parserCallback, removeRegexCallback } from "../handlers/parser.callback";
-// import type { Update } from "telegraf/typings/core/types/typegram";
+import {
+  parserCallback,
+  removeRegexCallback,
+} from "../handlers/parser.callback";
+import type { Update } from "telegraf/typings/core/types/typegram";
 
 async function init(fastify: FastifyInstance) {
-  const { BOT_TOKEN /* WEBHOOK_URL */ } = fastify.config;
+  const { BOT_TOKEN, WEBHOOK_URL } = fastify.config;
 
   await fastify.register(
     fp<{ token: string; store: typeof store }>(
@@ -57,25 +67,24 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
 
         bot.on("message", async (ctx, next) => {
-          console.log(ctx.session.state, "state of message");
-
-          if (ctx.session.state === "source_action") await sourceCallback(ctx);
-          else if (ctx.session.state === "parser_action") await parserCallback(ctx);
+          const { state } = ctx.session;
+          if (state === "source_action") await sourceCallback(ctx);
+          else if (state === "parser_action") await parserCallback(ctx);
           return await next();
         });
 
         bot.context.fastify = fastify;
 
-        bot.launch(() => console.log("Bot is running..."));
-        // const webhookPath = "/telegram";
-        // const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
+        // bot.launch(() => console.log("Bot is running..."));
+        const webhookPath = "/telegram";
+        const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
 
-        // await bot.telegram.setWebhook(webhookUrl);
+        await bot.telegram.setWebhook(webhookUrl);
 
-        // fastify.post(webhookPath, async (request, reply) => {
-        //   await bot.handleUpdate(request.body as Update);
-        //   return reply.send({ ok: true });
-        // });
+        fastify.post(webhookPath, async (request, reply) => {
+          await bot.handleUpdate(request.body as Update);
+          return reply.send({ ok: true });
+        });
 
         fastify.decorate("bot", bot);
       },
