@@ -1,0 +1,1 @@
+# hawk-trends-signals-bot
