@@ -1,4 +1,9 @@
-import { BASE_TWITTER_API, BOT_TOKEN, TWITTER_ACCOUNTS_ENDPOINT, TWITTER_API_KEY } from "../constants";
+import {
+  BASE_TWITTER_API,
+  BOT_TOKEN,
+  TWITTER_ACCOUNTS_ENDPOINT,
+  TWITTER_API_KEY,
+} from "../constants";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -16,7 +21,11 @@ class CustomFetch {
     this.apiKey = apiKey;
   }
 
-  private async request<T>(endpoint: string, method: HttpMethod, options: FetchOptions = {}): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    method: HttpMethod,
+    options: FetchOptions = {}
+  ): Promise<T> {
     const url = this.baseUrl + endpoint;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -43,7 +52,8 @@ class CustomFetch {
     }
 
     if (!response.ok) {
-      const message = data?.error || data?.msg || response.statusText || "Unknown error";
+      const message =
+        data?.error || data?.msg || response.statusText || "Unknown error";
       throw new Error(message);
     }
 
@@ -73,6 +83,9 @@ class CustomFetch {
 
 const TwitterApi = new CustomFetch(BASE_TWITTER_API, TWITTER_API_KEY);
 const MobulaApi = new CustomFetch(TWITTER_ACCOUNTS_ENDPOINT, "");
-const HawkSignalsAndTrendsAPI = new CustomFetch("https://hawk-trends-signals.onrender.com", BOT_TOKEN);
+const HawkSignalsAndTrendsAPI = new CustomFetch(
+  "https://hawk-trends-signals.up.railway.app",
+  BOT_TOKEN
+);
 
 export { TwitterApi, MobulaApi, HawkSignalsAndTrendsAPI };

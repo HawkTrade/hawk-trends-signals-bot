@@ -2,7 +2,7 @@ version: "3.9"
 services:
   bot:
     build: .
-    container_name: hawk-support-bot
+    container_name: hawk-trends-and-signal-bot
     env_file:
       - .env
     restart: always
