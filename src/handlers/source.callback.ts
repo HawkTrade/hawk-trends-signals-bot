@@ -16,10 +16,10 @@ async function sourceCallback(ctx: Context) {
       const body = { value: text, source };
 
       if (action === "add") {
-        const { msg, error } = await HSTAPI.post<Res>("/source/add", body);
+        const { msg, error } = await HSTAPI.post<Res>("/source", body);
         await ctx.reply(msg || error || "Shouldn't happen!");
       } else if (action === "rem") {
-        const res = await HSTAPI.delete<Res>("/source/remove", body);
+        const res = await HSTAPI.delete<Res>("/source", body);
         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
       }
     } catch (error) {
@@ -44,7 +44,7 @@ async function selectSourceCallback(ctx: Context) {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
     if (action === "get") {
-      const { data, msg, error } = await HSTAPI.get<Res>("/source/list?source=" + source);
+      const { data, msg, error } = await HSTAPI.get<Res>("/source?source=" + source);
       if (error) return await ctx.reply(error);
 
       await ctx.reply(`${msg}\n\n` + data!.map((src) => `• ${src}`).join("\n"));

@@ -5,11 +5,7 @@ import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 async function parserCallback(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message)) return;
   if (ctx.session.state !== "parser_action") return;
-  if (
-    !ctx.message.reply_to_message ||
-    ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id ||
-    !ctx.from?.id
-  )
+  if (!ctx.message.reply_to_message || ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id || !ctx.from?.id)
     return;
 
   if ("text" in ctx.message.reply_to_message) {
@@ -18,12 +14,15 @@ async function parserCallback(ctx: Context) {
       const [parser] = ctx.session.parser_action!.split(":") as [Parser];
 
       if (parser === "regex") {
-        const { msg, error } = await HSTAPI.post<Res>("/regex/add", {
+        const { msg, error } = await HSTAPI.post<Res>("/regex", {
           pattern: text,
         });
         await ctx.reply(msg || error || "Shouldn't happen!");
       } else if (parser === "llm") {
-        const res = await HSTAPI.post<Res>("/prompt/set", { prompt: text });
+        const res = await HSTAPI.post<Res>("/prompt", { prompt: text });
+        await ctx.reply(res.msg || res.error || "Shouldn't happen!");
+      } else if (parser === "webhook") {
+        const res = await HSTAPI.post<Res>("/webhook", { url: text });
         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
       }
     } catch (error) {
@@ -40,12 +39,7 @@ async function parserCallback(ctx: Context) {
 }
 
 async function removeRegexCallback(ctx: Context) {
-  if (
-    !ctx.callbackQuery ||
-    !("data" in ctx.callbackQuery) ||
-    !ctx.callbackQuery.data
-  )
-    return;
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery) || !ctx.callbackQuery.data) return;
 
   try {
     const [, encoded] = ctx.callbackQuery.data.split(":");
@@ -54,7 +48,7 @@ async function removeRegexCallback(ctx: Context) {
     await ctx.answerCbQuery();
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
-    const { error, msg } = await HSTAPI.delete<Res>("regex/remove", {
+    const { error, msg } = await HSTAPI.delete<Res>("/regex", {
       pattern,
     });
     await ctx.reply(msg || error || "Shouldn't happen!");
@@ -64,4 +58,25 @@ async function removeRegexCallback(ctx: Context) {
   }
 }
 
-export { removeRegexCallback, parserCallback };
+async function removeWebhookCallback(ctx: Context) {
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery) || !ctx.callbackQuery.data) return;
+
+  try {
+    const [, encoded] = ctx.callbackQuery.data.split(":");
+    if (!encoded) return;
+
+    const url = decodeURIComponent(encoded);
+    await ctx.answerCbQuery();
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+    const { error, msg } = await HSTAPI.delete<Res>("/webhook", {
+      url,
+    });
+    await ctx.reply(msg || error || "Shouldn't happen!");
+  } catch (error) {
+    console.error(error);
+    await ctx.answerCbQuery("An error occurred.");
+  }
+}
+
+export { removeRegexCallback, parserCallback, removeWebhookCallback };

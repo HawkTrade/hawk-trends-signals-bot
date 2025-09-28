@@ -6,26 +6,19 @@ import type { FastifyInstance } from "fastify";
 import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../handlers/start.command";
 import botCommands from "../handlers/commands";
-import {
-  addSourceHandler,
-  getSourceHandler,
-  removeSourceHandler,
-} from "../handlers/source.command";
-import {
-  selectSourceCallback,
-  sourceCallback,
-} from "../handlers/source.callback";
+import { addSourceHandler, getSourceHandler, removeSourceHandler } from "../handlers/source.command";
+import { selectSourceCallback, sourceCallback } from "../handlers/source.callback";
 import {
   addRegexHandler,
+  addWebhookHandler,
   getPromptsHandler,
   getRegexHandler,
+  getWebhookHandler,
   removeRegexHandler,
+  removeWebhookHandler,
   setPromptHandler,
 } from "../handlers/parser.command";
-import {
-  parserCallback,
-  removeRegexCallback,
-} from "../handlers/parser.callback";
+import { parserCallback, removeRegexCallback, removeWebhookCallback } from "../handlers/parser.callback";
 import type { Update } from "telegraf/typings/core/types/typegram";
 
 async function init(fastify: FastifyInstance) {
@@ -63,8 +56,13 @@ async function init(fastify: FastifyInstance) {
         bot.command("set_prompt", setPromptHandler);
         bot.command("get_prompts", getPromptsHandler);
 
+        bot.command("add_webhook", addWebhookHandler);
+        bot.command("remove_webhook", removeWebhookHandler);
+        bot.command("get_webhook", getWebhookHandler);
+
         bot.action(/^(telegram|x|rss):(add|rem|get)$/, selectSourceCallback);
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
+        bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;
