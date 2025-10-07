@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { Context as TelegrafContext } from "telegraf";
 
 type Action = "add" | "rem" | "get";
-type Source = "telegram" | "x" | "rss";
+type Source = "telegram" | "x" | "rss" | "tg_bot";
 type Parser = "regex" | "llm" | "webhook";
 
 interface Session {

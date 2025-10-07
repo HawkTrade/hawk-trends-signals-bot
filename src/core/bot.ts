@@ -38,9 +38,7 @@ async function init(fastify: FastifyInstance) {
           })
         );
 
-        await bot.telegram.setMyCommands(botCommands, {
-          scope: { type: "default" },
-        });
+        await bot.telegram.setMyCommands(botCommands);
 
         bot.start(startCmd);
         bot.command("help", helpCmd);
