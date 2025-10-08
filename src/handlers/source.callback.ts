@@ -55,7 +55,15 @@ async function selectSourceCallback(ctx: Context) {
     ctx.session.state = "source_action";
 
     await ctx.reply(
-      `Please enter the ${source === "rss" ? "feed URL" : source === "x" ? "X username" : "TG channel username"}:`,
+      `Please enter the ${
+        source === "rss"
+          ? "feed URL"
+          : source === "x"
+          ? "X username"
+          : source === "tg_bot"
+          ? "Channel ID"
+          : "Channel username"
+      }:`,
       {
         reply_markup: { force_reply: true },
       }
