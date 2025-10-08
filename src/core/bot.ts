@@ -58,7 +58,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("remove_webhook", removeWebhookHandler);
         bot.command("get_webhooks", getWebhookHandler);
 
-        bot.action(/^(telegram|x|rss):(add|rem|get)$/, selectSourceCallback);
+        bot.action(/^(telegram|x|rss|tg_bot):(add|rem|get)$/, selectSourceCallback);
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
         bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
 
