@@ -12,7 +12,7 @@ const botCommands: BotCommand[] = [
   { command: "get_prompts", description: "View the current LLM prompt" },
   { command: "add_webhook", description: "Add a new webhook that consumes data" },
   { command: "remove_webhook", description: "Remove an existing webhook url" },
-  { command: "get_webhook", description: "List all webhook endpoints" },
+  { command: "get_webhooks", description: "List all webhook endpoints" },
   { command: "help", description: "Show this help message" },
 ];
 
