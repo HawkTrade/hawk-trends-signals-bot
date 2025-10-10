@@ -53,8 +53,6 @@ async function init(fastify: FastifyInstance) {
           })
         );
 
-        await bot.telegram.setMyCommands(botCommands);
-
         bot.start(startCmd);
         bot.command("help", helpCmd);
 
@@ -99,6 +97,22 @@ async function init(fastify: FastifyInstance) {
         const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
 
         await bot.telegram.setWebhook(webhookUrl);
+
+        await bot.telegram.deleteMyCommands();
+        await Promise.all([
+          bot.telegram.setMyCommands(botCommands, {
+            scope: { type: "default" },
+          }),
+          bot.telegram.setMyCommands(botCommands, {
+            scope: { type: "all_private_chats" },
+          }),
+          bot.telegram.setMyCommands(botCommands, {
+            scope: { type: "all_group_chats" },
+          }),
+          bot.telegram.setMyCommands(botCommands, {
+            scope: { type: "all_chat_administrators" },
+          }),
+        ]);
 
         fastify.post(webhookPath, async (request, reply) => {
           await bot.handleUpdate(request.body as Update);
