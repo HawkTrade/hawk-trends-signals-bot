@@ -5,13 +5,20 @@ import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 async function sourceCallback(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message)) return;
   if (ctx.session.state !== "source_action") return;
-  if (!ctx.message.reply_to_message || ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id || !ctx.from?.id)
+  if (
+    !ctx.message.reply_to_message ||
+    ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id ||
+    !ctx.from?.id
+  )
     return;
 
   if ("text" in ctx.message.reply_to_message) {
     try {
       const text = ctx.message.text;
-      const [source, action] = ctx.session.source_action!.split(":") as [Source, Action];
+      const [source, action] = ctx.session.source_action!.split(":") as [
+        Source,
+        Action
+      ];
 
       const body = { value: text, source };
 
@@ -36,15 +43,25 @@ async function sourceCallback(ctx: Context) {
 }
 
 async function selectSourceCallback(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery) || !ctx.callbackQuery.data) return;
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
 
   try {
-    const [source, action] = ctx.callbackQuery.data.split(":") as [Source, Action];
+    const [source, action] = ctx.callbackQuery.data.split(":") as [
+      Source,
+      Action
+    ];
     await ctx.answerCbQuery();
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
     if (action === "get") {
-      const { data, msg, error } = await HSTAPI.get<Res>("/source?source=" + source);
+      const { data, msg, error } = await HSTAPI.get<Res>(
+        "/source?source=" + source
+      );
       if (error) return await ctx.reply(error);
 
       await ctx.reply(`${msg}\n\n` + data!.map((src) => `• ${src}`).join("\n"));
@@ -60,9 +77,11 @@ async function selectSourceCallback(ctx: Context) {
           ? "feed URL"
           : source === "x"
           ? "X username"
-          : source === "tg_bot"
-          ? "Channel ID"
-          : "Channel username"
+          : source === "telegram"
+          ? "Channel username"
+          : // : source === "discord"
+            // ? ""
+            "Channel ID"
       }:`,
       {
         reply_markup: { force_reply: true },

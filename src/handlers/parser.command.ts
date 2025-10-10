@@ -6,9 +6,12 @@ async function addRegexHandler(ctx: Context) {
   try {
     ctx.session.state = "parser_action";
     ctx.session.parser_action = "regex:add";
-    await ctx.reply("Please enter the regex: (wrong regex syntax will result in an error)", {
-      reply_markup: { force_reply: true },
-    });
+    await ctx.reply(
+      "Please enter the regex: (wrong regex syntax will result in an error)",
+      {
+        reply_markup: { force_reply: true },
+      }
+    );
   } catch (error) {
     console.error(error);
     await ctx.reply("An error occurred. Please try again later.");
@@ -24,7 +27,10 @@ async function removeRegexHandler(ctx: Context) {
     }
 
     const keyboard = data.map((pattern) => [
-      { text: pattern, callback_data: `regex_remove:${encodeURIComponent(pattern)}` },
+      {
+        text: pattern,
+        callback_data: `regex_remove:${encodeURIComponent(pattern)}`,
+      },
     ]);
 
     await ctx.reply("Select a regex pattern to remove:", {
@@ -94,7 +100,9 @@ async function removeWebhookHandler(ctx: Context) {
       return await ctx.reply("No webhook endpoints found.");
     }
 
-    const keyboard = data.map((uri) => [{ text: uri, callback_data: `webhook_remove:${encodeURIComponent(uri)}` }]);
+    const keyboard = data.map((uri) => [
+      { text: uri, callback_data: `webhook_remove:${encodeURIComponent(uri)}` },
+    ]);
 
     await ctx.reply("Select a webhook url to remove:", {
       reply_markup: { inline_keyboard: keyboard },
@@ -117,6 +125,69 @@ async function getWebhookHandler(ctx: Context) {
   }
 }
 
+async function addAdminHandler(ctx: Context) {
+  try {
+    ctx.session.state = "parser_action";
+    ctx.session.parser_action = "admin:add";
+    await ctx.reply(
+      "Please enter the Telegram ID of user to give admin access:",
+      {
+        reply_markup: { force_reply: true },
+      }
+    );
+  } catch (error) {
+    console.error("addAdminHandler error", error);
+    await ctx.reply("An error occurred. Please try again later.");
+  }
+}
+
+async function getAdminsFromId(ids: number[], ctx: Context) {
+  const admins = await Promise.all(
+    ids.map((id) => ctx.getChatMember(id).then((res) => res.user.first_name))
+  );
+  return admins;
+}
+
+async function removeAdminHandler(ctx: Context) {
+  try {
+    const { data, error } = await HSTAPI.get<Res<number[]>>("/admin");
+    if (error) return await ctx.reply(error);
+    if (!data || data.length === 0) {
+      return await ctx.reply("No admins found.");
+    }
+
+    const admins = await getAdminsFromId(data, ctx);
+    const keyboard = data.map((id, i) => [
+      {
+        text: admins[i] || id.toString(),
+        callback_data: `admin_remove:${id}`,
+      },
+    ]);
+
+    await ctx.reply("Select an admin to remove:", {
+      reply_markup: { inline_keyboard: keyboard },
+    });
+  } catch (error) {
+    console.error("removeAdminHandler error", error);
+    await ctx.reply("An error occurred. Please try again later.");
+  }
+}
+
+async function getAdminHandler(ctx: Context) {
+  try {
+    const { data, error, msg } = await HSTAPI.get<Res<number[]>>("/admin");
+    if (error) return await ctx.reply(error);
+
+    const admins =
+      data && data.length > 0 ? await getAdminsFromId(data, ctx) : [];
+
+    await ctx.reply(msg + "\n\n" + admins.map((r) => `• ${r}`).join("\n"));
+  } catch (error) {
+    console.error("getAdminHandler error", error);
+    await ctx.reply("An error occurred. Please try again later.");
+  }
+}
+
 export {
   removeRegexHandler,
   getRegexHandler,
@@ -126,4 +197,7 @@ export {
   addWebhookHandler,
   removeWebhookHandler,
   getWebhookHandler,
+  addAdminHandler,
+  removeAdminHandler,
+  getAdminHandler,
 };

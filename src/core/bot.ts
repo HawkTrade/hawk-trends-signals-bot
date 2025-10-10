@@ -6,8 +6,15 @@ import type { FastifyInstance } from "fastify";
 import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../handlers/start.command";
 import botCommands from "../handlers/commands";
-import { addSourceHandler, getSourceHandler, removeSourceHandler } from "../handlers/source.command";
-import { selectSourceCallback, sourceCallback } from "../handlers/source.callback";
+import {
+  addSourceHandler,
+  getSourceHandler,
+  removeSourceHandler,
+} from "../handlers/source.command";
+import {
+  selectSourceCallback,
+  sourceCallback,
+} from "../handlers/source.callback";
 import {
   addRegexHandler,
   addWebhookHandler,
@@ -17,8 +24,16 @@ import {
   removeRegexHandler,
   removeWebhookHandler,
   setPromptHandler,
+  getAdminHandler,
+  removeAdminHandler,
+  addAdminHandler,
 } from "../handlers/parser.command";
-import { parserCallback, removeRegexCallback, removeWebhookCallback } from "../handlers/parser.callback";
+import {
+  parserCallback,
+  removeRegexCallback,
+  removeWebhookCallback,
+  removeAdminCallback,
+} from "../handlers/parser.callback";
 import type { Update } from "telegraf/typings/core/types/typegram";
 
 async function init(fastify: FastifyInstance) {
@@ -58,9 +73,17 @@ async function init(fastify: FastifyInstance) {
         bot.command("remove_webhook", removeWebhookHandler);
         bot.command("get_webhooks", getWebhookHandler);
 
-        bot.action(/^(telegram|x|rss|tg_bot):(add|rem|get)$/, selectSourceCallback);
+        bot.command("add_admin", addAdminHandler);
+        bot.command("remove_admin", removeAdminHandler);
+        bot.command("get_admins", getAdminHandler);
+
+        bot.action(
+          /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
+          selectSourceCallback
+        );
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
         bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
+        bot.action(/^(admin_remove):(.+)$/, removeAdminCallback);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;

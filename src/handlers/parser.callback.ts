@@ -5,7 +5,11 @@ import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 async function parserCallback(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message)) return;
   if (ctx.session.state !== "parser_action") return;
-  if (!ctx.message.reply_to_message || ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id || !ctx.from?.id)
+  if (
+    !ctx.message.reply_to_message ||
+    ctx.message.reply_to_message?.from?.id !== ctx.botInfo.id ||
+    !ctx.from?.id
+  )
     return;
 
   if ("text" in ctx.message.reply_to_message) {
@@ -24,6 +28,9 @@ async function parserCallback(ctx: Context) {
       } else if (parser === "webhook") {
         const res = await HSTAPI.post<Res>("/webhook", { url: text });
         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
+      } else if (parser === "admin") {
+        const res = await HSTAPI.post<Res>("/admin", { adminId: Number(text) });
+        await ctx.reply(res.msg || res.error || "Shouldn't happen!");
       }
     } catch (error) {
       console.error("Error in parser callback", error);
@@ -39,7 +46,12 @@ async function parserCallback(ctx: Context) {
 }
 
 async function removeRegexCallback(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery) || !ctx.callbackQuery.data) return;
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
 
   try {
     const [, encoded] = ctx.callbackQuery.data.split(":");
@@ -59,7 +71,12 @@ async function removeRegexCallback(ctx: Context) {
 }
 
 async function removeWebhookCallback(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery) || !ctx.callbackQuery.data) return;
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
 
   try {
     const [, encoded] = ctx.callbackQuery.data.split(":");
@@ -79,4 +96,34 @@ async function removeWebhookCallback(ctx: Context) {
   }
 }
 
-export { removeRegexCallback, parserCallback, removeWebhookCallback };
+async function removeAdminCallback(ctx: Context) {
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
+
+  try {
+    const [, adminId] = ctx.callbackQuery.data.split(":");
+    if (!adminId) return;
+
+    await ctx.answerCbQuery();
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+    const { error, msg } = await HSTAPI.delete<Res>("/admin", {
+      adminId,
+    });
+    await ctx.reply(msg || error || "Shouldn't happen!");
+  } catch (error) {
+    console.error(error);
+    await ctx.answerCbQuery("An error occurred.");
+  }
+}
+
+export {
+  removeRegexCallback,
+  parserCallback,
+  removeWebhookCallback,
+  removeAdminCallback,
+};
