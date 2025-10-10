@@ -8,6 +8,8 @@ const keyboards = (action: "add" | "rem" | "get") => {
       { text: "Gram", callback_data: `telegram:${action}` },
       { text: "X", callback_data: `x:${action}` },
       { text: "RSS", callback_data: `rss:${action}` },
+    ],
+    [
       { text: "TG Bot", callback_data: `tg_bot:${action}` },
       { text: "Discord", callback_data: `discord:${action}` },
     ],
