@@ -76,9 +76,9 @@ async function init(fastify: FastifyInstance) {
         bot.command("get_admins", getAdminHandler);
 
         bot.action(
-          /^(x|rss|tg_bot|discord):(add|rem|get)$/,
+          /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
           selectSourceCallback
-        ); //telegram|
+        ); //
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
         bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
         bot.action(/^(admin_remove):(.+)$/, removeAdminCallback);
