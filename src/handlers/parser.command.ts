@@ -1,6 +1,7 @@
 import { Context } from "../models/telegraf.model";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
+import { getAdminsFromId } from "./utils";
 
 async function addRegexHandler(ctx: Context) {
   try {
@@ -139,13 +140,6 @@ async function addAdminHandler(ctx: Context) {
     console.error("addAdminHandler error", error);
     await ctx.reply("An error occurred. Please try again later.");
   }
-}
-
-async function getAdminsFromId(ids: number[], ctx: Context) {
-  const admins = await Promise.all(
-    ids.map((id) => ctx.getChatMember(id).then((res) => res.user.first_name))
-  );
-  return admins;
 }
 
 async function removeAdminHandler(ctx: Context) {

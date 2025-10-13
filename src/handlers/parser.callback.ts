@@ -13,10 +13,9 @@ async function parserCallback(ctx: Context) {
     return;
 
   if ("text" in ctx.message.reply_to_message) {
+    const text = ctx.message.text;
+    const [parser] = ctx.session.parser_action!.split(":") as [Parser];
     try {
-      const text = ctx.message.text;
-      const [parser] = ctx.session.parser_action!.split(":") as [Parser];
-
       if (parser === "regex") {
         const { msg, error } = await HSTAPI.post<Res>("/regex", {
           pattern: text,
@@ -31,9 +30,14 @@ async function parserCallback(ctx: Context) {
       } else if (parser === "admin") {
         const res = await HSTAPI.post<Res>("/admin", { adminId: Number(text) });
         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
+      } else if (parser === "pipeline") {
+        const res = await HSTAPI.post<Res>("/pipeline", {
+          pipeline: text,
+        });
+        await ctx.reply(res.msg || res.error || "Shouldn't happen!");
       }
     } catch (error) {
-      console.error("Error in parser callback", error);
+      console.error(`Error in parser (${parser}) callback`, error);
       if (error instanceof Error) {
         return ctx.reply(error.message);
       }
@@ -121,9 +125,61 @@ async function removeAdminCallback(ctx: Context) {
   }
 }
 
+async function removePipelineCallback(ctx: Context) {
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
+
+  try {
+    const [, pipeline] = ctx.callbackQuery.data.split(":");
+    if (!pipeline) return;
+
+    await ctx.answerCbQuery();
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+    const { error, msg } = await HSTAPI.delete<Res>("/pipeline", {
+      pipeline,
+    });
+    await ctx.reply(msg || error || "Shouldn't happen!");
+  } catch (error) {
+    console.error(error);
+    await ctx.answerCbQuery("An error occurred.");
+  }
+}
+
+async function setPipelineCallback(ctx: Context) {
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
+
+  try {
+    const [, pipeline] = ctx.callbackQuery.data.split(":");
+    if (!pipeline) return;
+
+    await ctx.answerCbQuery();
+    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+    const { error, msg } = await HSTAPI.post<Res>("/active-pipeline", {
+      pipeline,
+    });
+    await ctx.reply(msg || error || "Shouldn't happen!");
+  } catch (error) {
+    console.error(error);
+    await ctx.answerCbQuery("An error occurred.");
+  }
+}
+
 export {
   removeRegexCallback,
   parserCallback,
   removeWebhookCallback,
   removeAdminCallback,
+  removePipelineCallback,
+  setPipelineCallback,
 };

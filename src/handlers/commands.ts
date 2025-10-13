@@ -22,7 +22,14 @@ const botCommands: BotCommand[] = [
   { command: "add_admin", description: "Add a new admin user" },
   { command: "remove_admin", description: "Remove an admin user" },
   { command: "get_admins", description: "List all admin users" },
-
+  { command: "create_pipeline", description: "Create a new data pipeline" },
+  { command: "remove_pipeline", description: "Remove an existing pipeline" },
+  { command: "get_pipelines", description: "List all available pipelines" },
+  { command: "set_active_pipeline", description: "Set the active pipeline" },
+  {
+    command: "get_active_pipeline",
+    description: "Show the current active pipeline",
+  },
   { command: "help", description: "Show this help message" },
 ];
 

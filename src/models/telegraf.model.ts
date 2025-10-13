@@ -3,7 +3,7 @@ import { Context as TelegrafContext } from "telegraf";
 
 type Action = "add" | "rem" | "get";
 type Source = "telegram" | "x" | "rss" | "tg_bot" | "discord";
-type Parser = "regex" | "llm" | "webhook" | "admin";
+type Parser = "regex" | "llm" | "webhook" | "admin" | "pipeline";
 
 interface Session {
   ticketId: string | null;

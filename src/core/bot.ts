@@ -29,10 +29,19 @@ import {
   addAdminHandler,
 } from "../handlers/parser.command";
 import {
+  createPipelineHandler,
+  removePipelineHandler,
+  getPipelinesHandler,
+  setActivePipelineHandler,
+  getActivePipelineHandler,
+} from "../handlers/pipeline.command";
+import {
   parserCallback,
   removeRegexCallback,
   removeWebhookCallback,
   removeAdminCallback,
+  removePipelineCallback,
+  setPipelineCallback,
 } from "../handlers/parser.callback";
 import type { Update } from "telegraf/typings/core/types/typegram";
 
@@ -75,6 +84,12 @@ async function init(fastify: FastifyInstance) {
         bot.command("remove_admin", removeAdminHandler);
         bot.command("get_admins", getAdminHandler);
 
+        bot.command("create_pipeline", createPipelineHandler);
+        bot.command("remove_pipeline", removePipelineHandler);
+        bot.command("get_pipelines", getPipelinesHandler);
+        bot.command("set_active_pipeline", setActivePipelineHandler);
+        bot.command("get_active_pipeline", getActivePipelineHandler);
+
         bot.action(
           /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
           selectSourceCallback
@@ -82,6 +97,8 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
         bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
         bot.action(/^(admin_remove):(.+)$/, removeAdminCallback);
+        bot.action(/^(pipeline_remove):(.+)$/, removePipelineCallback);
+        bot.action(/^(pipeline_set):(.+)$/, setPipelineCallback);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;

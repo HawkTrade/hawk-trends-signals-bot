@@ -19,6 +19,13 @@ async function adminCheck(ctx: Context) {
   }
 }
 
+async function getAdminsFromId(ids: number[], ctx: Context) {
+  const admins = await Promise.all(
+    ids.map((id) => ctx.getChatMember(id).then((res) => res.user.first_name))
+  );
+  return admins;
+}
+
 async function adminCheck_returnsText(ctx: Context) {
   const { message, text } = ctx;
   if (!message || !text) return null;
@@ -33,4 +40,4 @@ async function adminCheck_returnsText(ctx: Context) {
   return text;
 }
 
-export { adminCheck, adminCheck_returnsText };
+export { adminCheck, adminCheck_returnsText, getAdminsFromId };
