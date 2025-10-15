@@ -1,5 +1,4 @@
 import type { Context } from "../models/telegraf.model";
-// import { ADMIN_IDS } from "../constants";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
 
@@ -26,6 +25,32 @@ async function getAdminsFromId(ids: number[], ctx: Context) {
   return admins;
 }
 
+async function getChannelNames(
+  ids: Array<string | number>,
+  ctx: Context
+): Promise<string[]> {
+  const chats = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const chat = await ctx.telegram.getChat(id);
+        switch (chat.type) {
+          case "group":
+          case "supergroup":
+          case "channel":
+            return chat.title || `${id}`;
+          default:
+            return `${id}`;
+        }
+      } catch (err) {
+        console.error(`Failed to fetch chat ${id}:`, err);
+        return `${id}`;
+      }
+    })
+  );
+
+  return chats;
+}
+
 async function adminCheck_returnsText(ctx: Context) {
   const { message, text } = ctx;
   if (!message || !text) return null;
@@ -40,4 +65,4 @@ async function adminCheck_returnsText(ctx: Context) {
   return text;
 }
 
-export { adminCheck, adminCheck_returnsText, getAdminsFromId };
+export { adminCheck, adminCheck_returnsText, getAdminsFromId, getChannelNames };

@@ -1,6 +1,7 @@
 import type { Action, Context, Source } from "../models/telegraf.model";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
+import { getChannelNames } from "./utils";
 
 async function sourceCallback(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message)) return;
@@ -64,7 +65,14 @@ async function selectSourceCallback(ctx: Context) {
       );
       if (error) return await ctx.reply(error);
 
-      await ctx.reply(`${msg}\n\n` + data!.map((src) => `• ${src}`).join("\n"));
+      const sources =
+        (source === "telegram" || source === "tg_bot") && data
+          ? await getChannelNames(data, ctx)
+          : data;
+
+      await ctx.reply(
+        `${msg}\n\n` + sources!.map((src) => `• ${src}`).join("\n")
+      );
       return;
     }
 
