@@ -80,52 +80,6 @@ async function getPromptsHandler(ctx: Context) {
   }
 }
 
-async function addWebhookHandler(ctx: Context) {
-  try {
-    ctx.session.state = "parser_action";
-    ctx.session.parser_action = "webhook:add";
-    await ctx.reply("Please enter the full URL:", {
-      reply_markup: { force_reply: true },
-    });
-  } catch (error) {
-    console.error("addWebhookHandler error", error);
-    await ctx.reply("An error occurred. Please try again later.");
-  }
-}
-
-async function removeWebhookHandler(ctx: Context) {
-  try {
-    const { data, error } = await HSTAPI.get<Res>("/webhook");
-    if (error) return await ctx.reply(error);
-    if (!data || data.length === 0) {
-      return await ctx.reply("No webhook endpoints found.");
-    }
-
-    const keyboard = data.map((uri) => [
-      { text: uri, callback_data: `webhook_remove:${encodeURIComponent(uri)}` },
-    ]);
-
-    await ctx.reply("Select a webhook url to remove:", {
-      reply_markup: { inline_keyboard: keyboard },
-    });
-  } catch (error) {
-    console.error("removeWebhookHandler error", error);
-    await ctx.reply("An error occurred. Please try again later.");
-  }
-}
-
-async function getWebhookHandler(ctx: Context) {
-  try {
-    const { data, error, msg } = await HSTAPI.get<Res>("/webhook");
-    if (error) return await ctx.reply(error);
-
-    await ctx.reply(msg + "\n\n" + data?.map((r) => `• ${r}`).join("\n"));
-  } catch (error) {
-    console.error("getWebhookHandler error", error);
-    await ctx.reply("An error occurred. Please try again later.");
-  }
-}
-
 async function addAdminHandler(ctx: Context) {
   try {
     ctx.session.state = "parser_action";
@@ -188,9 +142,6 @@ export {
   addRegexHandler,
   getPromptsHandler,
   setPromptHandler,
-  addWebhookHandler,
-  removeWebhookHandler,
-  getWebhookHandler,
   addAdminHandler,
   removeAdminHandler,
   getAdminHandler,

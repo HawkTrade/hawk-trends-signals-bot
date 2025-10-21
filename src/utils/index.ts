@@ -17,11 +17,10 @@ const asyncPipe =
   };
 
 const getDefaultSession = (): Session => ({
-  ticketId: null,
-  lastInteraction: Date.now(),
   state: "idle",
   source_action: null,
   parser_action: null,
+  pipeline: null,
 });
 
 export { asyncPipe, getDefaultSession, getEnv };

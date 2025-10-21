@@ -14,15 +14,13 @@ import {
 import {
   selectSourceCallback,
   sourceCallback,
+  selectPipelineCallback,
 } from "../handlers/source.callback";
 import {
   addRegexHandler,
-  addWebhookHandler,
   getPromptsHandler,
   getRegexHandler,
-  getWebhookHandler,
   removeRegexHandler,
-  removeWebhookHandler,
   setPromptHandler,
   getAdminHandler,
   removeAdminHandler,
@@ -32,7 +30,6 @@ import {
   createPipelineHandler,
   removePipelineHandler,
   getPipelinesHandler,
-  setActivePipelineHandler,
   getActivePipelineHandler,
 } from "../handlers/pipeline.command";
 import {
@@ -41,7 +38,6 @@ import {
   removeWebhookCallback,
   removeAdminCallback,
   removePipelineCallback,
-  setPipelineCallback,
 } from "../handlers/parser.callback";
 import type { Update } from "telegraf/typings/core/types/typegram";
 
@@ -68,6 +64,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("add_source", addSourceHandler);
         bot.command("remove_source", removeSourceHandler);
         bot.command("get_sources", getSourceHandler);
+        bot.command("get_source", getSourceHandler); //
 
         bot.command("add_regex", addRegexHandler);
         bot.command("remove_regex", removeRegexHandler);
@@ -76,10 +73,6 @@ async function init(fastify: FastifyInstance) {
         bot.command("set_prompt", setPromptHandler);
         bot.command("get_prompts", getPromptsHandler);
 
-        bot.command("add_webhook", addWebhookHandler);
-        bot.command("remove_webhook", removeWebhookHandler);
-        bot.command("get_webhooks", getWebhookHandler);
-
         bot.command("add_admin", addAdminHandler);
         bot.command("remove_admin", removeAdminHandler);
         bot.command("get_admins", getAdminHandler);
@@ -87,18 +80,17 @@ async function init(fastify: FastifyInstance) {
         bot.command("create_pipeline", createPipelineHandler);
         bot.command("remove_pipeline", removePipelineHandler);
         bot.command("get_pipelines", getPipelinesHandler);
-        bot.command("set_active_pipeline", setActivePipelineHandler);
-        bot.command("get_active_pipeline", getActivePipelineHandler);
+        bot.command("get_pipeline", getActivePipelineHandler);
 
         bot.action(
           /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
           selectSourceCallback
-        ); //
+        );
+        bot.action(/^(pipeline_select):(.+)$/, selectPipelineCallback);
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
         bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
         bot.action(/^(admin_remove):(.+)$/, removeAdminCallback);
         bot.action(/^(pipeline_remove):(.+)$/, removePipelineCallback);
-        bot.action(/^(pipeline_set):(.+)$/, setPipelineCallback);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;

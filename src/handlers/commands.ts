@@ -13,12 +13,6 @@ const botCommands: BotCommand[] = [
   { command: "get_regex", description: "List all regex patterns" },
   { command: "set_prompt", description: "Set a new LLM prompt for parsing" },
   { command: "get_prompts", description: "View the current LLM prompt" },
-  {
-    command: "add_webhook",
-    description: "Add a new webhook that consumes data",
-  },
-  { command: "remove_webhook", description: "Remove an existing webhook url" },
-  { command: "get_webhooks", description: "List all webhook endpoints" },
   { command: "add_admin", description: "Add a new admin user" },
   { command: "remove_admin", description: "Remove an admin user" },
   { command: "get_admins", description: "List all admin users" },

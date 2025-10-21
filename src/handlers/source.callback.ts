@@ -77,7 +77,20 @@ async function selectSourceCallback(ctx: Context) {
     }
 
     ctx.session.source_action = `${source}:${action}`;
-    ctx.session.state = "source_action";
+
+    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
+    if (!pipelines) throw new Error("No Pipelines to select from");
+
+    await ctx.reply("Select a pipeline:", {
+      reply_markup: {
+        inline_keyboard: pipelines.map((p: any) => [
+          {
+            text: p.pipeline,
+            callback_data: `pipeline_select:${p.pipeline}`,
+          },
+        ]),
+      },
+    });
 
     await ctx.reply(
       `Please enter the ${
@@ -101,4 +114,39 @@ async function selectSourceCallback(ctx: Context) {
   }
 }
 
-export { selectSourceCallback, sourceCallback };
+async function selectPipelineCallback(ctx: Context) {
+  if (
+    !ctx.callbackQuery ||
+    !("data" in ctx.callbackQuery) ||
+    !ctx.callbackQuery.data
+  )
+    return;
+  const pipeline = ctx.callbackQuery.data.split(":")[1];
+  if (!pipeline) return;
+
+  try {
+    ctx.session.pipeline = pipeline;
+
+    if (ctx.session.source_action) {
+      await ctx.reply(
+        "Please enter the value (channel ID / username / feed URL):",
+        {
+          reply_markup: { force_reply: true },
+        }
+      );
+      ctx.session.state = "source_action";
+    }
+
+    if (ctx.session.parser_action) {
+      await ctx.reply("Please enter the value for parser:", {
+        reply_markup: { force_reply: true },
+      });
+      ctx.session.state = "parser_action";
+    }
+  } catch (error) {
+    console.error(error);
+    await ctx.answerCbQuery("An error occurred.");
+  }
+}
+
+export { selectSourceCallback, sourceCallback, selectPipelineCallback };
