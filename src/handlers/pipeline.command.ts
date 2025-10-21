@@ -2,6 +2,7 @@ import { Context } from "../models/telegraf.model";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
 import { Pipeline } from "../models/db.model";
+import { code } from "telegraf/typings/format";
 
 async function createPipelineHandler(ctx: Context) {
   try {
@@ -67,7 +68,9 @@ async function getPipelinesHandler(ctx: Context) {
     if (error) return await ctx.reply(error);
 
     await ctx.reply(
-      msg + "\n\n" + data?.map((r) => `• ${r.pipeline} `).join("\n")
+      msg +
+        "\n\n" +
+        data?.map((r) => `• ${r.pipeline}  — ${code(r.strategyId)}`).join("\n")
     );
   } catch (error) {
     console.error("getPipelinesHandler error", error);
