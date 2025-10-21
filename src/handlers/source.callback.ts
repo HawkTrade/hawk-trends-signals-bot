@@ -1,4 +1,4 @@
-import type { Action, Context, Source } from "../models/telegraf.model";
+import type { Action, Context, Parser, Source } from "../models/telegraf.model";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 import { getChannelNames } from "./utils";
@@ -62,6 +62,7 @@ async function selectSourceCallback(ctx: Context) {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
     // Get all sources for a source (x, rss etc.)
+    await ctx.sendChatAction("typing");
     if (action === "get") {
       const { data, msg, error } = await HSTAPI.get<Res>("/source/" + source);
       if (error) return await ctx.reply(error);
@@ -109,10 +110,11 @@ async function selectPipelineCallback(ctx: Context) {
   if (!pipeline) return;
 
   try {
+    const { source_action, parser_action } = ctx.session;
     ctx.session.pipeline = pipeline;
 
-    if (ctx.session.source_action) {
-      const [source] = ctx.session.source_action.split(":");
+    if (source_action) {
+      const [source] = source_action.split(":");
       await ctx.reply(
         `Please enter the ${
           source === "rss"
@@ -130,10 +132,47 @@ async function selectPipelineCallback(ctx: Context) {
         }
       );
       ctx.session.state = "source_action";
-    }
+    } else if (parser_action) {
+      const [parser, action] = parser_action.split(":") as [Parser, Action];
 
-    if (ctx.session.parser_action) {
-      await ctx.reply("Please enter the value for parser:", {
+      await ctx.sendChatAction("typing");
+      if (action === "get") {
+        const url = parser === "llm" ? "/prompt" : "/regex";
+        const { msg, error, data } = await HSTAPI.get<Res>(
+          url + "/" + pipeline
+        );
+        if (error) return await ctx.reply(error);
+
+        if (parser === "llm") await ctx.reply(msg || "Shouldn't happen");
+        else
+          await ctx.reply(msg + "\n\n" + data?.map((r) => `• ${r}`).join("\n"));
+        return;
+      } else if (action === "rem") {
+        const { data, error } = await HSTAPI.get<Res>("/regex/" + pipeline);
+        if (error) return await ctx.reply(error);
+        if (!data || data.length === 0) {
+          return await ctx.reply("No regex patterns found.");
+        }
+
+        const keyboard = data.map((pattern) => [
+          {
+            text: pattern,
+            callback_data: `regex_remove:${encodeURIComponent(pattern)}`,
+          },
+        ]);
+
+        await ctx.reply("Select a regex pattern to remove:", {
+          reply_markup: { inline_keyboard: keyboard },
+        });
+
+        return;
+      }
+
+      const msg =
+        parser === "regex"
+          ? "Please enter the regex: (wrong regex syntax and missing fields like asset and direction in syntax will result in an error)"
+          : "Please enter the new LLM prompt (LLM output must match TradeRequest, missing fields like asset and direction will throw an error)";
+      await ctx.reply(msg, {
         reply_markup: { force_reply: true },
       });
       ctx.session.state = "parser_action";

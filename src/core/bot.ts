@@ -30,7 +30,7 @@ import {
   createPipelineHandler,
   removePipelineHandler,
   getPipelinesHandler,
-  getActivePipelineHandler,
+  setPipelineStrategyHandler,
 } from "../handlers/pipeline.command";
 import {
   parserCallback,
@@ -79,7 +79,6 @@ async function init(fastify: FastifyInstance) {
         bot.command("create_pipeline", createPipelineHandler);
         bot.command("remove_pipeline", removePipelineHandler);
         bot.command("get_pipelines", getPipelinesHandler);
-        bot.command("get_pipeline", getActivePipelineHandler);
 
         bot.action(
           /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
@@ -94,6 +93,8 @@ async function init(fastify: FastifyInstance) {
           const { state } = ctx.session;
           if (state === "source_action") await sourceCallback(ctx);
           else if (state === "parser_action") await parserCallback(ctx);
+          else if (state === "pipeline_create")
+            await setPipelineStrategyHandler(ctx);
           return await next();
         });
 

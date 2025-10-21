@@ -6,7 +6,7 @@ type Source = "telegram" | "x" | "rss" | "tg_bot" | "discord";
 type Parser = "regex" | "llm" | "admin" | "pipeline";
 
 interface Session {
-  state: "idle" | "source_action" | "parser_action" | "pipeline_select";
+  state: "idle" | "source_action" | "parser_action" | "pipeline_create";
   source_action: `${Source}:${Action}` | null;
   parser_action: `${Parser}:${Action}` | null;
   pipeline: string | null;
