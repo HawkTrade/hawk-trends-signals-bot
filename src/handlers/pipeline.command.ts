@@ -1,8 +1,8 @@
-import { Context } from "../models/telegraf.model";
+import type { Context } from "../models/telegraf.model";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
-import { Pipeline } from "../models/db.model";
-import { code } from "telegraf/typings/format";
+import type { Pipeline } from "../models/db.model";
+import { code } from "telegraf/format";
 
 async function createPipelineHandler(ctx: Context) {
   try {
