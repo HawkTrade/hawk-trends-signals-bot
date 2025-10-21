@@ -35,7 +35,6 @@ import {
 import {
   parserCallback,
   removeRegexCallback,
-  removeWebhookCallback,
   removeAdminCallback,
   removePipelineCallback,
 } from "../handlers/parser.callback";
@@ -88,7 +87,6 @@ async function init(fastify: FastifyInstance) {
         );
         bot.action(/^(pipeline_select):(.+)$/, selectPipelineCallback);
         bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
-        bot.action(/^(webhook_remove):(.+)$/, removeWebhookCallback);
         bot.action(/^(admin_remove):(.+)$/, removeAdminCallback);
         bot.action(/^(pipeline_remove):(.+)$/, removePipelineCallback);
 

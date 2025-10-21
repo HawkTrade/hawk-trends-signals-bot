@@ -21,7 +21,9 @@ async function sourceCallback(ctx: Context) {
         Action
       ];
 
-      const body = { value: text, source };
+      const pipeline = ctx.session.pipeline;
+      const body = { value: text, source, pipeline };
+      ctx.session.pipeline = null;
 
       if (action === "add") {
         const { msg, error } = await HSTAPI.post<Res>("/source", body);
@@ -59,10 +61,9 @@ async function selectSourceCallback(ctx: Context) {
     await ctx.answerCbQuery();
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
+    // Get all sources for a source (x, rss etc.)
     if (action === "get") {
-      const { data, msg, error } = await HSTAPI.get<Res>(
-        "/source?source=" + source
-      );
+      const { data, msg, error } = await HSTAPI.get<Res>("/source/" + source);
       if (error) return await ctx.reply(error);
 
       const sources =
@@ -75,12 +76,12 @@ async function selectSourceCallback(ctx: Context) {
       );
       return;
     }
-
-    ctx.session.source_action = `${source}:${action}`;
+    // Will work on handler for getting sources for a source on a specific pipeline
 
     const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
     if (!pipelines) throw new Error("No Pipelines to select from");
 
+    ctx.session.source_action = `${source}:${action}`;
     await ctx.reply("Select a pipeline:", {
       reply_markup: {
         inline_keyboard: pipelines.map((p: any) => [
@@ -91,23 +92,6 @@ async function selectSourceCallback(ctx: Context) {
         ]),
       },
     });
-
-    await ctx.reply(
-      `Please enter the ${
-        source === "rss"
-          ? "feed URL"
-          : source === "x"
-          ? "X username"
-          : source === "telegram"
-          ? "Channel username"
-          : // : source === "discord"
-            // ? ""
-            "Channel ID"
-      }:`,
-      {
-        reply_markup: { force_reply: true },
-      }
-    );
   } catch (error) {
     console.error(error);
     await ctx.answerCbQuery("An error occurred.");
@@ -128,8 +112,19 @@ async function selectPipelineCallback(ctx: Context) {
     ctx.session.pipeline = pipeline;
 
     if (ctx.session.source_action) {
+      const [source] = ctx.session.source_action.split(":");
       await ctx.reply(
-        "Please enter the value (channel ID / username / feed URL):",
+        `Please enter the ${
+          source === "rss"
+            ? "feed URL"
+            : source === "x"
+            ? "X username"
+            : source === "telegram"
+            ? "Channel username"
+            : // : source === "discord"
+              // ? ""
+              "Channel ID"
+        }:`,
         {
           reply_markup: { force_reply: true },
         }

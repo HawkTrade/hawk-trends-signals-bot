@@ -6,7 +6,7 @@ const botCommands: BotCommand[] = [
   { command: "remove_source", description: "Remove a source" },
   {
     command: "get_sources",
-    description: "List all the data sources for a given pipeline",
+    description: "List all the data sources for a given source",
   },
   { command: "add_regex", description: "Add a new regex pattern for parsing" },
   { command: "remove_regex", description: "Remove an existing regex pattern" },
@@ -21,7 +21,7 @@ const botCommands: BotCommand[] = [
   { command: "get_pipelines", description: "List all available pipelines" },
   { command: "set_active_pipeline", description: "Set the active pipeline" },
   {
-    command: "get_active_pipeline",
+    command: "get_pipeline",
     description: "Show the current active pipeline",
   },
   { command: "help", description: "Show this help message" },

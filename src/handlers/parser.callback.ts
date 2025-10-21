@@ -24,9 +24,6 @@ async function parserCallback(ctx: Context) {
       } else if (parser === "llm") {
         const res = await HSTAPI.post<Res>("/prompt", { prompt: text });
         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
-      } else if (parser === "webhook") {
-        const res = await HSTAPI.post<Res>("/webhook", { url: text });
-        await ctx.reply(res.msg || res.error || "Shouldn't happen!");
       } else if (parser === "admin") {
         const res = await HSTAPI.post<Res>("/admin", { adminId: Number(text) });
         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
@@ -66,32 +63,6 @@ async function removeRegexCallback(ctx: Context) {
 
     const { error, msg } = await HSTAPI.delete<Res>("/regex", {
       pattern,
-    });
-    await ctx.reply(msg || error || "Shouldn't happen!");
-  } catch (error) {
-    console.error(error);
-    await ctx.answerCbQuery("An error occurred.");
-  }
-}
-
-async function removeWebhookCallback(ctx: Context) {
-  if (
-    !ctx.callbackQuery ||
-    !("data" in ctx.callbackQuery) ||
-    !ctx.callbackQuery.data
-  )
-    return;
-
-  try {
-    const [, encoded] = ctx.callbackQuery.data.split(":");
-    if (!encoded) return;
-
-    const url = decodeURIComponent(encoded);
-    await ctx.answerCbQuery();
-    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-
-    const { error, msg } = await HSTAPI.delete<Res>("/webhook", {
-      url,
     });
     await ctx.reply(msg || error || "Shouldn't happen!");
   } catch (error) {
@@ -178,7 +149,6 @@ async function setPipelineCallback(ctx: Context) {
 export {
   removeRegexCallback,
   parserCallback,
-  removeWebhookCallback,
   removeAdminCallback,
   removePipelineCallback,
   setPipelineCallback,
