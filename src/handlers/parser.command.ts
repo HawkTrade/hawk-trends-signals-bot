@@ -2,24 +2,12 @@ import { Context } from "../models/telegraf.model";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
 import { getAdminsFromId } from "./utils";
+import { sharedGetPipelineCallback } from "./pipeline.command";
 
 async function addRegexHandler(ctx: Context) {
   try {
-    await ctx.sendChatAction("typing");
-    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
-    if (!pipelines) throw new Error("No Pipelines to select from");
-
+    await sharedGetPipelineCallback(ctx);
     ctx.session.parser_action = "regex:add";
-    await ctx.reply("Select a pipeline:", {
-      reply_markup: {
-        inline_keyboard: pipelines.map((p: any) => [
-          {
-            text: p.pipeline,
-            callback_data: `pipeline_select:${p.pipeline}`,
-          },
-        ]),
-      },
-    });
   } catch (error) {
     console.error(error);
     await ctx.reply("An error occurred. Please try again later.");
@@ -28,21 +16,7 @@ async function addRegexHandler(ctx: Context) {
 
 async function removeRegexHandler(ctx: Context) {
   try {
-    await ctx.sendChatAction("typing");
-
-    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
-    if (!pipelines) throw new Error("No Pipelines to select from");
-
-    await ctx.reply("Select a pipeline:", {
-      reply_markup: {
-        inline_keyboard: pipelines.map((p: any) => [
-          {
-            text: p.pipeline,
-            callback_data: `pipeline_select:${p.pipeline}`,
-          },
-        ]),
-      },
-    });
+    await sharedGetPipelineCallback(ctx);
     ctx.session.parser_action = "regex:rem";
   } catch (error) {
     console.error("removeRegexHandler error", error);
@@ -52,21 +26,7 @@ async function removeRegexHandler(ctx: Context) {
 
 async function getRegexHandler(ctx: Context) {
   try {
-    await ctx.sendChatAction("typing");
-
-    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
-    if (!pipelines) throw new Error("No Pipelines to select from");
-
-    await ctx.reply("Select a pipeline:", {
-      reply_markup: {
-        inline_keyboard: pipelines.map((p: any) => [
-          {
-            text: p.pipeline,
-            callback_data: `pipeline_select:${p.pipeline}`,
-          },
-        ]),
-      },
-    });
+    await sharedGetPipelineCallback(ctx);
     ctx.session.parser_action = "regex:get";
   } catch (error) {
     console.error("getRegexHandler error", error);
@@ -76,21 +36,7 @@ async function getRegexHandler(ctx: Context) {
 
 async function setPromptHandler(ctx: Context) {
   try {
-    await ctx.sendChatAction("typing");
-
-    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
-    if (!pipelines) throw new Error("No Pipelines to select from");
-
-    await ctx.reply("Select a pipeline:", {
-      reply_markup: {
-        inline_keyboard: pipelines.map((p: any) => [
-          {
-            text: p.pipeline,
-            callback_data: `pipeline_select:${p.pipeline}`,
-          },
-        ]),
-      },
-    });
+    await sharedGetPipelineCallback(ctx);
     ctx.session.parser_action = "llm:add";
   } catch (error) {
     console.error("setPromptHandler error", error);
@@ -100,21 +46,7 @@ async function setPromptHandler(ctx: Context) {
 
 async function getPromptsHandler(ctx: Context) {
   try {
-    await ctx.sendChatAction("typing");
-
-    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
-    if (!pipelines) throw new Error("No Pipelines to select from");
-
-    await ctx.reply("Select a pipeline:", {
-      reply_markup: {
-        inline_keyboard: pipelines.map((p: any) => [
-          {
-            text: p.pipeline,
-            callback_data: `pipeline_select:${p.pipeline}`,
-          },
-        ]),
-      },
-    });
+    await sharedGetPipelineCallback(ctx);
     ctx.session.parser_action = "llm:get";
   } catch (error) {
     console.error("getPromptsHandler error", error);

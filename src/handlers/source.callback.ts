@@ -1,6 +1,7 @@
 import type { Action, Context, Parser, Source } from "../models/telegraf.model";
 import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
 import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
+import { sharedGetPipelineCallback } from "./pipeline.command";
 import { getChannelNames } from "./utils";
 
 async function sourceCallback(ctx: Context) {
@@ -13,35 +14,33 @@ async function sourceCallback(ctx: Context) {
   )
     return;
 
-  if ("text" in ctx.message.reply_to_message) {
-    try {
-      const text = ctx.message.text;
-      const [source, action] = ctx.session.source_action!.split(":") as [
-        Source,
-        Action
-      ];
+  try {
+    const text = ctx.message.text;
+    const [source, action] = ctx.session.source_action!.split(":") as [
+      Source,
+      Action
+    ];
 
-      const pipeline = ctx.session.pipeline;
-      const body = { value: text, source, pipeline };
-      ctx.session.pipeline = null;
+    const pipeline = ctx.session.pipeline;
+    const body = { value: text, source, pipeline };
+    ctx.session.pipeline = null;
 
-      if (action === "add") {
-        const { msg, error } = await HSTAPI.post<Res>("/source", body);
-        await ctx.reply(msg || error || "Shouldn't happen!");
-      } else if (action === "rem") {
-        const res = await HSTAPI.delete<Res>("/source", body);
-        await ctx.reply(res.msg || res.error || "Shouldn't happen!");
-      }
-    } catch (error) {
-      console.error("Error in feed callback", error);
-      if (error instanceof Error) {
-        return ctx.reply(error.message);
-      }
-      await ctx.reply("An error occurred. Please try again later.");
-    } finally {
-      ctx.session.state = "idle";
-      ctx.session.source_action = null;
+    if (action === "add") {
+      const { msg, error } = await HSTAPI.post<Res>("/source", body);
+      await ctx.reply(msg || error || "Shouldn't happen!");
+    } else if (action === "rem") {
+      const res = await HSTAPI.delete<Res>("/source", body);
+      await ctx.reply(res.msg || res.error || "Shouldn't happen!");
     }
+  } catch (error) {
+    console.error("Error in feed callback", error);
+    if (error instanceof Error) {
+      return ctx.reply(error.message);
+    }
+    await ctx.reply("An error occurred. Please try again later.");
+  } finally {
+    ctx.session.state = "idle";
+    ctx.session.source_action = null;
   }
 }
 
@@ -62,8 +61,8 @@ async function selectSourceCallback(ctx: Context) {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
 
     // Get all sources for a source (x, rss etc.)
-    await ctx.sendChatAction("typing");
     if (action === "get") {
+      await ctx.sendChatAction("typing");
       const { data, msg, error } = await HSTAPI.get<Res>("/source/" + source);
       if (error) return await ctx.reply(error);
 
@@ -79,20 +78,8 @@ async function selectSourceCallback(ctx: Context) {
     }
     // Will work on handler for getting sources for a source on a specific pipeline
 
-    const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
-    if (!pipelines) throw new Error("No Pipelines to select from");
-
+    await sharedGetPipelineCallback(ctx);
     ctx.session.source_action = `${source}:${action}`;
-    await ctx.reply("Select a pipeline:", {
-      reply_markup: {
-        inline_keyboard: pipelines.map((p: any) => [
-          {
-            text: p.pipeline,
-            callback_data: `pipeline_select:${p.pipeline}`,
-          },
-        ]),
-      },
-    });
   } catch (error) {
     console.error(error);
     await ctx.answerCbQuery("An error occurred.");

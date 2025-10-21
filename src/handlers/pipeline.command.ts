@@ -78,9 +78,28 @@ async function getPipelinesHandler(ctx: Context) {
   }
 }
 
+async function sharedGetPipelineCallback(ctx: Context) {
+  await ctx.sendChatAction("typing");
+
+  const { data: pipelines } = await HSTAPI.get<Res>("/pipeline");
+  if (!pipelines) throw new Error("No Pipelines to select from");
+
+  await ctx.reply("Select a pipeline:", {
+    reply_markup: {
+      inline_keyboard: pipelines.map((p: any) => [
+        {
+          text: p.pipeline,
+          callback_data: `pipeline_select:${p.pipeline}`,
+        },
+      ]),
+    },
+  });
+}
+
 export {
   getPipelinesHandler,
   createPipelineHandler,
   removePipelineHandler,
   setPipelineStrategyHandler,
+  sharedGetPipelineCallback,
 };
