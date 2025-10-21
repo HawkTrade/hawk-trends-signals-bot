@@ -67,8 +67,10 @@ async function removeRegexCallback(ctx: Context) {
     if (!encoded || !pipeline) return;
     const pattern = decodeURIComponent(encoded);
 
+    // await ctx.answerCbQuery();
+    // await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
     await ctx.answerCbQuery();
-    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    await ctx.deleteMessage();
 
     const { error, msg } = await HSTAPI.delete<Res>("/regex", {
       pattern,
@@ -94,7 +96,7 @@ async function removeAdminCallback(ctx: Context) {
     if (!adminId) return;
 
     await ctx.answerCbQuery();
-    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    await ctx.deleteMessage();
 
     const { error, msg } = await HSTAPI.delete<Res>("/admin", {
       adminId,
@@ -119,7 +121,7 @@ async function removePipelineCallback(ctx: Context) {
     if (!pipeline) return;
 
     await ctx.answerCbQuery();
-    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    await ctx.deleteMessage();
 
     const { error, msg } = await HSTAPI.delete<Res>("/pipeline/" + pipeline);
     await ctx.reply(msg || error || "Shouldn't happen!");

@@ -58,7 +58,7 @@ async function selectSourceCallback(ctx: Context) {
       Action
     ];
     await ctx.answerCbQuery();
-    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    await ctx.deleteMessage();
 
     // Get all sources for a source (x, rss etc.)
     if (action === "get") {
