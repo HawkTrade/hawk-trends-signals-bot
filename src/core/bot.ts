@@ -7,10 +7,10 @@ import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../commands/start.command";
 import botCommands from "../commands/commands";
 import {
-  addSourceHandler,
-  getSourceHandler,
-  removeSourceHandler,
-} from "../_handlers/source.command";
+  addSourceCmd,
+  removeSourceCmd,
+  getSourcesCmd,
+} from "../commands/source.command";
 // import {
 //   selectSourceCallback,
 //   sourceCallback,
@@ -23,9 +23,9 @@ import {
 //   removeRegexHandler,
 //   setPromptHandler,
 import {
-  getAdminHandler,
-  removeAdminHandler,
-  addAdminHandler,
+  getAdminsCmd,
+  removeAdminCmd,
+  addAdminCmd,
 } from "../commands/admin.command";
 import {
   createPipelineCmd,
@@ -46,6 +46,7 @@ import {
   getPipelineCb,
   removePipelineCb,
 } from "../callbacks/pipeline.callback";
+import { removeAdminCb } from "../callbacks/single.callbacks";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN } = fastify.config;
@@ -68,10 +69,14 @@ async function init(fastify: FastifyInstance) {
         bot.command("help", helpCmd);
 
         /* Source Management Section */
-        bot.command("add_source", addSourceHandler);
-        bot.command("remove_source", removeSourceHandler);
-        bot.command("get_sources", getSourceHandler);
-        bot.command("get_source", getSourceHandler); //
+        bot.command("add_source", addSourceCmd);
+        bot.command("remove_source", removeSourceCmd);
+        bot.command("get_sources", getSourcesCmd);
+
+        // bot.action(
+        //   /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
+        //   selectSourceCallback
+        // );
 
         // bot.command("add_regex", addRegexHandler);
         // bot.command("remove_regex", removeRegexHandler);
@@ -81,9 +86,11 @@ async function init(fastify: FastifyInstance) {
         // bot.command("get_prompts", getPromptsHandler);
 
         /* Admin Manager Section */
-        bot.command("add_admin", addAdminHandler);
-        bot.command("remove_admin", removeAdminHandler);
-        bot.command("get_admins", getAdminHandler);
+        bot.command("add_admin", addAdminCmd);
+        bot.command("remove_admin", removeAdminCmd);
+        bot.command("get_admins", getAdminsCmd);
+
+        bot.action(/^(admin_remove):(.+)$/, removeAdminCb);
 
         /* Pipelines Section */
         bot.command("create_pipeline", createPipelineCmd);
@@ -95,11 +102,6 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(remove_pipeline):(.+)$/, removePipelineCb);
         bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
 
-        // bot.action(
-        //   /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
-        //   selectSourceCallback
-        // );
-        // bot.action(/^(pipeline_select):(.+)$/, selectPipelineCallback);
         // bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
         // bot.action(/^(pipeline_remove):(.+)$/, removePipelineCallback);
 

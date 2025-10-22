@@ -3,12 +3,17 @@ import { Context as TelegrafContext } from "telegraf";
 
 type Action = "add" | "rem" | "get";
 type Source = "telegram" | "x" | "rss" | "tg_bot" | "discord";
-type Parser = "regex" | "llm" | "admin" | "pipeline";
+type Parser = "regex" | "llm";
 
 type CB_Action = "confirm" | "cancel";
 
 interface Session {
-  state: "idle" | "source_action" | "parser_action" | "pipeline_create";
+  state:
+    | "idle"
+    | "source_action"
+    | "parser_action"
+    | "pipeline_create"
+    | "admin_add";
   source_action: `${Source}:${Action}` | null;
   parser_action: `${Parser}:${Action}` | null;
   pipeline: string | null;

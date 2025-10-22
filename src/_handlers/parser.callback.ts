@@ -30,7 +30,7 @@
 //         });
 //         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
 //       } else if (parser === "admin") {
-//         const res = await HSTAPI.post<Res>("/admin", { adminId: Number(text) });
+//
 //         await ctx.reply(res.msg || res.error || "Shouldn't happen!");
 //       } else if (parser === "pipeline") {
 //         const res = await HSTAPI.post<Res>("/pipeline", {
@@ -82,58 +82,3 @@
 //     await ctx.answerCbQuery("An error occurred.");
 //   }
 // }
-
-// async function removeAdminCallback(ctx: Context) {
-//   if (
-//     !ctx.callbackQuery ||
-//     !("data" in ctx.callbackQuery) ||
-//     !ctx.callbackQuery.data
-//   )
-//     return;
-
-//   try {
-//     const [, adminId] = ctx.callbackQuery.data.split(":");
-//     if (!adminId) return;
-
-//     await ctx.answerCbQuery();
-//     await ctx.deleteMessage();
-
-//     const { error, msg } = await HSTAPI.delete<Res>("/admin", {
-//       adminId,
-//     });
-//     await ctx.reply(msg || error || "Shouldn't happen!");
-//   } catch (error) {
-//     console.error(error);
-//     await ctx.answerCbQuery("An error occurred.");
-//   }
-// }
-
-// async function removePipelineCallback(ctx: Context) {
-//   if (
-//     !ctx.callbackQuery ||
-//     !("data" in ctx.callbackQuery) ||
-//     !ctx.callbackQuery.data
-//   )
-//     return;
-
-//   try {
-//     const [, pipeline] = ctx.callbackQuery.data.split(":");
-//     if (!pipeline) return;
-
-//     await ctx.answerCbQuery();
-//     await ctx.deleteMessage();
-
-//     const { error, msg } = await HSTAPI.delete<Res>("/pipeline/" + pipeline);
-//     await ctx.reply(msg || error || "Shouldn't happen!");
-//   } catch (error) {
-//     console.error(error);
-//     await ctx.answerCbQuery("An error occurred.");
-//   }
-// }
-
-// export {
-//   removeRegexCallback,
-//   parserCallback,
-//   removeAdminCallback,
-//   removePipelineCallback,
-// };
