@@ -22,20 +22,14 @@ import {
   removePipelineCmd,
   getPipelinesCmd,
 } from "../commands/pipeline.command";
-// import {
-//   parserCallback,
-//   removeRegexCallback,
-//   removeAdminCallback,
-//   removePipelineCallback,
-// } from "../_handlers/parser.callback";
-// import type { Update } from "telegraf/typings/core/types/typegram";
+import type { Update } from "telegraf/typings/core/types/typegram";
 import { createPipelineMsg } from "../handlers/pipeline.handler";
 import {
   createPipelineCb,
   getPipelineCb,
   removePipelineCb,
 } from "../callbacks/pipeline.callback";
-import { removeAdminCb } from "../callbacks/single.callbacks";
+import { removeAdminCb } from "../callbacks/admin.callback";
 import {
   removePipelineSourceCb,
   sourceSelectedCb,
@@ -52,7 +46,7 @@ import {
 import { removePipelineRegexCb } from "../callbacks/parser.callback";
 
 async function init(fastify: FastifyInstance) {
-  const { BOT_TOKEN } = fastify.config;
+  const { BOT_TOKEN, WEBHOOK_URL } = fastify.config;
 
   await fastify.register(
     fp<{ token: string; store: typeof store }>(
@@ -97,7 +91,7 @@ async function init(fastify: FastifyInstance) {
 
         bot.action(/^(admin_remove):(.+)$/, removeAdminCb);
 
-        /* Pipelines Section */
+        /* Pipelines Management Section */
         bot.command("create_pipeline", createPipelineCmd);
         bot.command("cancel_pipeline_creation", cancelPipelineCmd);
         bot.command("get_pipelines", getPipelinesCmd);
@@ -129,11 +123,11 @@ async function init(fastify: FastifyInstance) {
 
         bot.context.fastify = fastify;
 
-        bot.launch(() => console.log("Bot is running..."));
-        // const webhookPath = "/telegram";
-        // const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
+        // bot.launch(() => console.log("Bot is running..."));
+        const webhookPath = "/telegram";
+        const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
 
-        // await bot.telegram.setWebhook(webhookUrl);
+        await bot.telegram.setWebhook(webhookUrl);
 
         await bot.telegram.deleteMyCommands();
         await Promise.all([
@@ -151,10 +145,10 @@ async function init(fastify: FastifyInstance) {
           }),
         ]);
 
-        // fastify.post(webhookPath, async (request, reply) => {
-        //   await bot.handleUpdate(request.body as Update);
-        //   return reply.send({ ok: true });
-        // });
+        fastify.post(webhookPath, async (request, reply) => {
+          await bot.handleUpdate(request.body as Update);
+          return reply.send({ ok: true });
+        });
 
         fastify.decorate("bot", bot);
       },
