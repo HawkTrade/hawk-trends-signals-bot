@@ -85,8 +85,8 @@ class CustomFetch<H = unknown> {
 const TwitterApi = new CustomFetch(BASE_TWITTER_API, TWITTER_API_KEY);
 const MobulaApi = new CustomFetch(TWITTER_ACCOUNTS_ENDPOINT, "");
 const HawkApi = new CustomFetch<HawkApiResponse>(
-  // "https://hawk-trends-signals.up.railway.app",
-  "https://87bbb7c30634.ngrok-free.app",
+  "https://hawk-trends-signals.up.railway.app",
+  // "https://87bbb7c30634.ngrok-free.app",
   BOT_TOKEN
 );
 
