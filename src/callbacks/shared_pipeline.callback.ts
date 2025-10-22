@@ -32,8 +32,10 @@ async function _selectedPipelineCb(ctx: Context) {
         break;
       case "add":
         await addPipelineSourceCb_(ctx, source);
+        break;
       case "rem":
         await removePipelineSourceCb_(ctx, source, pipeline);
+        break;
     }
   } else if (parser_action) {
     const [parser, action] = parser_action.split(":") as [Parser, Action];
