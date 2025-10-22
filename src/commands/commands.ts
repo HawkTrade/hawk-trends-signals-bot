@@ -19,10 +19,9 @@ const botCommands: BotCommand[] = [
   { command: "create_pipeline", description: "Create a new data pipeline" },
   { command: "remove_pipeline", description: "Remove an existing pipeline" },
   { command: "get_pipelines", description: "List all available pipelines" },
-  { command: "set_active_pipeline", description: "Set the active pipeline" },
   {
-    command: "get_pipeline",
-    description: "Show the current active pipeline",
+    command: "cancel_pipeline_creation",
+    description: "removes from cache,pipeline being created",
   },
   { command: "help", description: "Show this help message" },
 ];

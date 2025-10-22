@@ -1,5 +1,9 @@
 import type { MiddlewareFn } from "telegraf";
 import type { Context } from "../models/telegraf.model";
+import type { HawkApiResponse } from "../models/twitter.api";
+import { HawkApi } from "./fetch";
+import { to_delete } from ".";
+import cache from "../db/cache";
 
 function errorWrapper(handler: MiddlewareFn<Context>): MiddlewareFn<Context> {
   const functionName = handler.name || "anonymousHandler";
@@ -43,4 +47,28 @@ function groupOrSuperGroupChecker(ctx: Context) {
   return ctx.chat.id.toString();
 }
 
-export { groupOrSuperGroupChecker, errorWrapper };
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+async function getAdmins() {
+  const admins = cache.get("admins");
+  if (admins) {
+    return admins.split(",").map((a) => Number(a));
+  }
+  const { data } = await HawkApi.get<HawkApiResponse<number[]>>("/admin");
+  if (!data) return [];
+
+  cache.set("admins", data.join(","), { ttl: ONE_WEEK * 4 });
+  return data;
+}
+
+async function validateCallerIsAdmin(ctx: Context) {
+  if (!ctx.from) return null;
+  const fromId = ctx.from.id;
+
+  const [admins] = await Promise.all([getAdmins(), to_delete(ctx)]);
+  const isAdmin = admins.includes(fromId);
+  if (!isAdmin) {
+    throw new Error("This is an admin only command");
+  }
+}
+
+export { groupOrSuperGroupChecker, validateCallerIsAdmin, errorWrapper };

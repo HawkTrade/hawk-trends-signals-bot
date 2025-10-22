@@ -5,13 +5,18 @@ import {
   fullPipelineMessage,
   localPipelineMessage,
 } from "../messages/pipeline.messages";
-import { errorWrapper, groupOrSuperGroupChecker } from "../utils/helpers";
+import {
+  errorWrapper,
+  groupOrSuperGroupChecker,
+  validateCallerIsAdmin,
+} from "../utils/helpers";
 import { HawkApi } from "../utils/fetch";
 import type { HawkApiResponse } from "../models/twitter.api";
 import type { Pipeline, LocalPipeline } from "../models/db.model";
 import { pipelinesKeyboard } from "../keyboards/pipeline.keyboards";
 
 async function _createPipelineCmd(ctx: Context) {
+  await validateCallerIsAdmin(ctx);
   const key = groupOrSuperGroupChecker(ctx);
 
   const pipeline_in_cache = cache.get(key);
@@ -27,6 +32,7 @@ async function _createPipelineCmd(ctx: Context) {
 }
 
 async function _cancelPipelineCmd(ctx: Context) {
+  await validateCallerIsAdmin(ctx);
   const key = groupOrSuperGroupChecker(ctx);
 
   const pipeline_in_cache = cache.get(key);
@@ -43,6 +49,7 @@ async function _cancelPipelineCmd(ctx: Context) {
 }
 
 async function _removePipelineCmd(ctx: Context) {
+  await validateCallerIsAdmin(ctx);
   const { data, error } = await HawkApi.get<HawkApiResponse<LocalPipeline[]>>(
     "/pipeline?with_hawk=false"
   );
@@ -55,17 +62,16 @@ async function _removePipelineCmd(ctx: Context) {
     reply_markup: { inline_keyboard: keyboard },
   });
   ctx.session.toDelete.push(message_id);
-  if (ctx.message?.message_id)
-    ctx.session.toDelete.push(ctx.message.message_id);
 }
 
 async function _getPipelinesCmd(ctx: Context) {
+  await validateCallerIsAdmin(ctx);
   const { data, error, msg } = await HawkApi.get<HawkApiResponse<Pipeline[]>>(
     "/pipeline?with_hawk=true"
   );
   if (error) throw error;
 
-  const keyboard = pipelinesKeyboard(data, "remove_pipeline");
+  const keyboard = pipelinesKeyboard(data, "get_pipeline");
   const message = fullPipelineMessage(msg, data);
   await ctx.reply(message, { reply_markup: { inline_keyboard: keyboard } });
 }
@@ -97,12 +103,12 @@ async function _getPipelinesCmd(ctx: Context) {
 
 const createPipelineCmd = errorWrapper(_createPipelineCmd);
 const cancelPipelineCmd = errorWrapper(_cancelPipelineCmd);
-const getPipelineCmd = errorWrapper(_getPipelinesCmd);
+const getPipelinesCmd = errorWrapper(_getPipelinesCmd);
 const removePipelineCmd = errorWrapper(_removePipelineCmd);
 
 export {
   createPipelineCmd,
   cancelPipelineCmd,
-  getPipelineCmd,
+  getPipelinesCmd,
   removePipelineCmd,
 };

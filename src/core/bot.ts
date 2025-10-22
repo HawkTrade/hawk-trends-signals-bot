@@ -31,7 +31,7 @@ import {
   createPipelineCmd,
   cancelPipelineCmd,
   removePipelineCmd,
-  getPipelineCmd,
+  getPipelinesCmd,
 } from "../commands/pipeline.command";
 // import {
 //   parserCallback,
@@ -88,7 +88,7 @@ async function init(fastify: FastifyInstance) {
         /* Pipelines Section */
         bot.command("create_pipeline", createPipelineCmd);
         bot.command("cancel_pipeline_creation", cancelPipelineCmd);
-        bot.command("get_pipelines", getPipelineCmd);
+        bot.command("get_pipelines", getPipelinesCmd);
         bot.command("remove_pipeline", removePipelineCmd);
 
         bot.action(/^(pipeline_create):(confirm|cancel)$/, createPipelineCb);

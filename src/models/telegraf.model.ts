@@ -11,7 +11,6 @@ interface Session {
   state: "idle" | "source_action" | "parser_action" | "pipeline_create";
   source_action: `${Source}:${Action}` | null;
   parser_action: `${Parser}:${Action}` | null;
-  pipeline_action: `pipeline:${Action}` | null;
   pipeline: string | null;
   toDelete: number[];
 }

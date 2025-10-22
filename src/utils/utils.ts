@@ -1,21 +1,4 @@
 import type { Context } from "../models/telegraf.model";
-import { HawkApiResponse } from "../models/twitter.api";
-import { HawkApi } from "./fetch";
-async function getAdmins() {
-  const { data } = await HawkApi.get<HawkApiResponse<number[]>>("/admin");
-  return data || [];
-}
-
-async function adminCheck(ctx: Context) {
-  if (!ctx.message) return null;
-  const fromId = ctx.message.from.id;
-
-  const admins = await getAdmins();
-  const isAdmin = admins.includes(fromId);
-  if (!isAdmin) {
-    throw new Error("This is an admin only command");
-  }
-}
 
 async function getAdminsFromId(ids: number[], ctx: Context) {
   const admins = await Promise.all(
@@ -50,18 +33,4 @@ async function getChannelNames(
   return chats;
 }
 
-async function adminCheck_returnsText(ctx: Context) {
-  const { message, text } = ctx;
-  if (!message || !text) return null;
-
-  const fromId = message.from.id;
-  const admins = await getAdmins();
-  const isAdmin = admins.includes(fromId);
-  if (!isAdmin) {
-    throw new Error("This is an admin only command");
-  }
-
-  return text;
-}
-
-export { adminCheck, adminCheck_returnsText, getAdminsFromId, getChannelNames };
+export { getAdminsFromId, getChannelNames };

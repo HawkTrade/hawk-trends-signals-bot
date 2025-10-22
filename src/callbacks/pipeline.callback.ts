@@ -7,7 +7,6 @@ import {
   createPipelineSummary,
   getPipelineSummary,
 } from "../messages/pipeline.messages";
-import { to_delete } from "../utils";
 import { HawkApiResponse } from "../models/twitter.api";
 
 async function _actionCreatePipelineCb(ctx: Context) {
@@ -53,8 +52,8 @@ async function _removePipelineCb(ctx: Context) {
   const { error, msg } = await HawkApi.delete("/pipeline/" + pipeline);
   if (error) throw error;
 
-  await ctx.answerCbQuery(msg!, { show_alert: true });
-  await to_delete(ctx);
+  await ctx.answerCbQuery();
+  await ctx.reply(msg!);
 }
 
 async function _getPipelineCb(ctx: Context) {

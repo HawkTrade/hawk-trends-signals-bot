@@ -1,5 +1,9 @@
-import { bold, fmt, italic } from "telegraf/format";
-import { CreatePipeline, LocalPipeline, Pipeline } from "../models/db.model";
+import { bold, fmt, italic, join, spoiler } from "telegraf/format";
+import type {
+  CreatePipeline,
+  LocalPipeline,
+  Pipeline,
+} from "../models/db.model";
 
 const createPipelineMessage = fmt`${bold("Let's set up a new pipeline!")}
   
@@ -39,15 +43,15 @@ function localPipelineMessage(
   action: LocalPipelineAction
 ) {
   if (!pipelines || !pipelines.length)
-    return fmt`No pipelines available to ${action}`;
+    return `No pipelines available to ${action}`;
 
-  const pipeline_msg = pipelines
-    .map((p, i) => fmt`${bold(`${i + 1}.`)} ${p.name}`)
-    .join("\n");
+  const pipeline_msg = pipelines.map(
+    (p, i) => fmt`${bold(`${i + 1}.`)} ${p.name}`
+  );
 
   return fmt`${bold("Here are the list of pipelines: ")}
   
-${pipeline_msg}
+${join(pipeline_msg, "\n")}
 
 ${italic("Select from the buttons below, the pipeline to " + action)}`;
 }
@@ -62,20 +66,17 @@ function fullPipelineMessage(
     )}`;
   }
 
-  const pipeline_msg = pipelines
-    .map(
-      (p, i) =>
-        fmt`${bold(`${i + 1}. ${p.name}`)} ${italic(
-          `(${new Date(p.created_at).toLocaleDateString()})`
-        )}
-${italic(p.description)}
-${bold("Brands:")} ${p.brands.join(", ")}`
-    )
-    .join("\n\n");
+  const pipeline_msg = pipelines.map(
+    (p, i) =>
+      fmt`
+${bold(`${i + 1}. ${p.name}`)}
+  ${italic(p.description)}
+  ${bold("Brands:")} ${p.brands[0]}`
+  );
 
   return fmt`${bold(msg)}
 
-${pipeline_msg}`;
+  ${join(pipeline_msg, "\n\n")}`;
 }
 
 function getPipelineSummary(msg: string, pipeline: Pipeline) {
@@ -84,6 +85,7 @@ function getPipelineSummary(msg: string, pipeline: Pipeline) {
 ${bold("Name:")} ${pipeline.name}
 ${bold("Description:")} ${pipeline.description}
 ${bold("Brand:")} ${pipeline.brands[0]}
+${bold("Strategy ID:")} ${spoiler`${pipeline.strategyId}`}
 
 Created at: ${italic(new Date(pipeline.created_at).toISOString())}
 Updated at: ${italic(new Date(pipeline.updated_at).toISOString())}`;
