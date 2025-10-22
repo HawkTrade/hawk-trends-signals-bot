@@ -1,6 +1,6 @@
 import { fmt, mention } from "telegraf/format";
 import cache from "../db/cache";
-import type { Action, Context, Source } from "../models/telegraf.model";
+import type { Action, Context, Parser, Source } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
 import { errorWrapper } from "../utils/helpers";
 import { getDefaultSession, to_delete } from "../utils";
@@ -28,12 +28,31 @@ async function _addAdminMsg(ctx: Context) {
   await to_delete(ctx);
 }
 
-async function _sourceMsg(ctx: Context) {
+async function _addSourceMsg(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message))
     throw new Error("No message in text");
   const text = ctx.message.text;
-  const [source, action] = ctx.session.source_action!.split(":") as [
-    Source,
+  const [source] = ctx.session.source_action!.split(":") as [Source];
+
+  const pipeline = ctx.session.pipeline;
+  const body = { value: text, source, pipeline };
+
+  ctx.session.pipeline = null;
+
+  const { msg, error } = await HawkApi.post("source", body);
+  if (error) throw error;
+  if (!msg) throw new Error("API response is malformed!");
+
+  await ctx.reply(msg);
+  ctx.session = getDefaultSession();
+}
+
+async function _addParserMsg(ctx: Context) {
+  if (!ctx.message || !("text" in ctx.message))
+    throw new Error("No message in text");
+  const text = ctx.message.text;
+  const [source, action] = ctx.session.parser_action!.split(":") as [
+    Parser,
     Action
   ];
 
@@ -52,6 +71,7 @@ async function _sourceMsg(ctx: Context) {
 }
 
 const addAdminMsg = errorWrapper(_addAdminMsg);
-const sourceMsg = errorWrapper(_sourceMsg);
+const addSourceMsg = errorWrapper(_addSourceMsg);
+const addParserMsg = errorWrapper(_addParserMsg);
 
-export { addAdminMsg, sourceMsg };
+export { addAdminMsg, addSourceMsg, addParserMsg };

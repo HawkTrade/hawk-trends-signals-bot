@@ -36,9 +36,20 @@ import {
   removePipelineCb,
 } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/single.callbacks";
-import { sourceSelectedCb } from "../callbacks/source.callback";
-import { sourceMsg } from "../handlers/general.handler";
+import {
+  removePipelineSourceCb,
+  sourceSelectedCb,
+} from "../callbacks/source.callback";
+import { addParserMsg, addSourceMsg } from "../handlers/general.handler";
 import { selectedPipelineCb } from "../callbacks/shared_pipeline.callback";
+import {
+  addRegexCmd,
+  getPromptCmd,
+  getRegexesCmd,
+  removeRegexCmd,
+  setPromptCmd,
+} from "../commands/parser.command";
+import { removePipelineRegexCb } from "../callbacks/parser.callback";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN } = fastify.config;
@@ -69,13 +80,15 @@ async function init(fastify: FastifyInstance) {
           /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
           sourceSelectedCb
         );
+        bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
+        bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
 
-        // bot.command("add_regex", addRegexHandler);
-        // bot.command("remove_regex", removeRegexHandler);
-        // bot.command("get_regex", getRegexHandler);
-
-        // bot.command("set_prompt", setPromptHandler);
-        // bot.command("get_prompts", getPromptsHandler);
+        /* Parser Management Section */
+        bot.command("add_regex", addRegexCmd);
+        bot.command("remove_regex", removeRegexCmd);
+        bot.command("get_regexes", getRegexesCmd);
+        bot.command("set_prompt", setPromptCmd);
+        bot.command("get_prompts", getPromptCmd);
 
         /* Admin Manager Section */
         bot.command("add_admin", addAdminCmd);
@@ -95,13 +108,22 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
         bot.action(/^(selected_pipeline):(.+)$/, selectedPipelineCb); // Shared across parsers and sources
 
-        // bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
-
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;
-          if (state === "source_action") await sourceMsg(ctx, next);
-          // else if (state === "parser_action") await parserCallback(ctx);
-          if (state === "pipeline_create") await createPipelineMsg(ctx, next);
+          switch (state) {
+            case "source_action":
+              await addSourceMsg(ctx, next);
+              break;
+            case "parser_action":
+              await addParserMsg(ctx, next);
+              break;
+            case "pipeline_create":
+              await createPipelineMsg(ctx, next);
+              break;
+
+            default:
+              break;
+          }
           return await next();
         });
 

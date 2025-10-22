@@ -14,4 +14,18 @@ ${join(sources_msg, "\n")}
 `;
 }
 
-export { getSourcesMessage };
+function getParserMessage(
+  msg: string | undefined,
+  parsers: string[] | undefined
+) {
+  if (!msg || !parsers) return "API response seems invalid";
+
+  const parsers_msg = parsers.map((src) => fmt`• ${bold(src)}`);
+
+  return fmt`${bold(msg)}
+  
+${join(parsers_msg, "\n")}
+`;
+}
+
+export { getSourcesMessage, getParserMessage };

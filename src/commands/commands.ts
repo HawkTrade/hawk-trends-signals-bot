@@ -10,7 +10,7 @@ const botCommands: BotCommand[] = [
   },
   { command: "add_regex", description: "Add a new regex pattern for parsing" },
   { command: "remove_regex", description: "Remove an existing regex pattern" },
-  { command: "get_regex", description: "List all regex patterns" },
+  { command: "get_regexes", description: "List all regex patterns" },
   { command: "set_prompt", description: "Set a new LLM prompt for parsing" },
   { command: "get_prompts", description: "View the current LLM prompt" },
   { command: "add_admin", description: "Add a new admin user" },
