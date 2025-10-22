@@ -70,12 +70,11 @@ async function sharedSelectPipelineCb_(ctx: Context) {
       }))
     );
   }
-  await ctx.reply(fmt`${bold("Select a pipeline to complete this action")}`),
-    {
-      reply_markup: {
-        inline_keyboard: keyboard,
-      },
-    };
+  await ctx.reply(fmt`${bold("Select a pipeline to complete this action")}`, {
+    reply_markup: {
+      inline_keyboard: keyboard,
+    },
+  });
 }
 
 const selectedPipelineCb = errorWrapper(_selectedPipelineCb);
