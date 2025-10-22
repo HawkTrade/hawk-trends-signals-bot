@@ -30,8 +30,8 @@ import {
 import {
   createPipelineCmd,
   cancelPipelineCmd,
-  // removePipelineHandler,
-  // getPipelinesHandler,
+  removePipelineCmd,
+  getPipelineCmd,
 } from "../commands/pipeline.command";
 // import {
 //   parserCallback,
@@ -41,7 +41,11 @@ import {
 // } from "../_handlers/parser.callback";
 // import type { Update } from "telegraf/typings/core/types/typegram";
 import { createPipelineMsg } from "../handlers/pipeline.handler";
-import { createPipelineCb } from "../callbacks/pipeline.callback";
+import {
+  createPipelineCb,
+  getPipelineCb,
+  removePipelineCb,
+} from "../callbacks/pipeline.callback";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN } = fastify.config;
@@ -63,6 +67,7 @@ async function init(fastify: FastifyInstance) {
         bot.start(startCmd);
         bot.command("help", helpCmd);
 
+        /* Source Management Section */
         bot.command("add_source", addSourceHandler);
         bot.command("remove_source", removeSourceHandler);
         bot.command("get_sources", getSourceHandler);
@@ -75,13 +80,20 @@ async function init(fastify: FastifyInstance) {
         // bot.command("set_prompt", setPromptHandler);
         // bot.command("get_prompts", getPromptsHandler);
 
+        /* Admin Manager Section */
         bot.command("add_admin", addAdminHandler);
         bot.command("remove_admin", removeAdminHandler);
         bot.command("get_admins", getAdminHandler);
 
+        /* Pipelines Section */
         bot.command("create_pipeline", createPipelineCmd);
         bot.command("cancel_pipeline_creation", cancelPipelineCmd);
-        // bot.command("get_pipelines", getPipelinesHandler);
+        bot.command("get_pipelines", getPipelineCmd);
+        bot.command("remove_pipeline", removePipelineCmd);
+
+        bot.action(/^(pipeline_create):(confirm|cancel)$/, createPipelineCb);
+        bot.action(/^(remove_pipeline):(.+)$/, removePipelineCb);
+        bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
 
         // bot.action(
         //   /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
@@ -89,9 +101,7 @@ async function init(fastify: FastifyInstance) {
         // );
         // bot.action(/^(pipeline_select):(.+)$/, selectPipelineCallback);
         // bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
-        // bot.action(/^(admin_remove):(.+)$/, removeAdminCallback);
         // bot.action(/^(pipeline_remove):(.+)$/, removePipelineCallback);
-        bot.action(/^(pipeline_create):(.+)$/, createPipelineCb);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;

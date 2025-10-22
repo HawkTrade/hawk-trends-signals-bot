@@ -3,12 +3,14 @@ import type { CreatePipeline } from "../models/db.model";
 import { errorWrapper, groupOrSuperGroupChecker } from "../utils/helpers";
 import cache from "../db/cache";
 import {
-  actionCreatePipelineKeyboard,
   createPipelineSummary,
   describePipelineMessage,
-  selectBrandForPipeline,
   selectBrandForPipelineMessage,
 } from "../messages/pipeline.messages";
+import {
+  actionCreatePipelineKeyboard,
+  selectBrandForPipelineKeyboard,
+} from "../keyboards/pipeline.keyboards";
 
 const CREATE_PIPELINE_STEPS: (keyof CreatePipeline)[] = [
   "pipeline",
@@ -47,7 +49,7 @@ async function _createPipelineMsg(ctx: Context) {
       partial.description = text;
       replyId = (
         await ctx.reply(selectBrandForPipelineMessage, {
-          reply_markup: selectBrandForPipeline,
+          reply_markup: selectBrandForPipelineKeyboard,
         })
       ).message_id;
       break;

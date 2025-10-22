@@ -1,7 +1,15 @@
 import type { Context } from "../models/telegraf.model";
 import cache from "../db/cache";
-import { createPipelineMessage } from "../messages/pipeline.messages";
+import {
+  createPipelineMessage,
+  fullPipelineMessage,
+  localPipelineMessage,
+} from "../messages/pipeline.messages";
 import { errorWrapper, groupOrSuperGroupChecker } from "../utils/helpers";
+import { HawkApi } from "../utils/fetch";
+import type { HawkApiResponse } from "../models/twitter.api";
+import type { Pipeline, LocalPipeline } from "../models/db.model";
+import { pipelinesKeyboard } from "../keyboards/pipeline.keyboards";
 
 async function _createPipelineCmd(ctx: Context) {
   const key = groupOrSuperGroupChecker(ctx);
@@ -34,48 +42,33 @@ async function _cancelPipelineCmd(ctx: Context) {
   ctx.session.toDelete.push(message_id);
 }
 
-// async function removePipelineHandler(ctx: Context) {
-//   try {
-//     const { data, error } = await HSTAPI.get<Res>("/pipeline");
-//     if (error) return await ctx.reply(error);
-//     if (!data || data.length <= 1) {
-//       return await ctx.reply(
-//         "No other pipelines save for general, exists and hence cannot be removed."
-//       );
-//     }
+async function _removePipelineCmd(ctx: Context) {
+  const { data, error } = await HawkApi.get<HawkApiResponse<LocalPipeline[]>>(
+    "/pipeline?with_hawk=false"
+  );
+  if (error) throw error;
 
-//     const pipelines = data.filter((p) => p !== "general");
-//     const keyboard = pipelines.map((pipeline) => [
-//       {
-//         text: pipeline,
-//         callback_data: `pipeline_remove:${pipeline}`,
-//       },
-//     ]);
+  const keyboard = pipelinesKeyboard(data, "remove_pipeline");
+  const message = localPipelineMessage(data, "remove");
 
-//     await ctx.reply("Select a pipeline to remove:", {
-//       reply_markup: { inline_keyboard: keyboard },
-//     });
-//   } catch (error) {
-//     console.error("removePipelineHandler error", error);
-//     await ctx.reply("An error occurred. Please try again later.");
-//   }
-// }
+  const { message_id } = await ctx.reply(message, {
+    reply_markup: { inline_keyboard: keyboard },
+  });
+  ctx.session.toDelete.push(message_id);
+  if (ctx.message?.message_id)
+    ctx.session.toDelete.push(ctx.message.message_id);
+}
 
-// async function getPipelinesHandler(ctx: Context) {
-//   try {
-//     const { data, error, msg } = await HSTAPI.get<Res<Pipeline[]>>("/pipeline");
-//     if (error) return await ctx.reply(error);
+async function _getPipelinesCmd(ctx: Context) {
+  const { data, error, msg } = await HawkApi.get<HawkApiResponse<Pipeline[]>>(
+    "/pipeline?with_hawk=true"
+  );
+  if (error) throw error;
 
-//     await ctx.reply(
-//       msg +
-//         "\n\n" +
-//         data?.map((r) => `• ${r.pipeline}  — ${code(r.strategyId)}`).join("\n")
-//     );
-//   } catch (error) {
-//     console.error("getPipelinesHandler error", error);
-//     await ctx.reply("An error occurred. Please try again later.");
-//   }
-// }
+  const keyboard = pipelinesKeyboard(data, "remove_pipeline");
+  const message = fullPipelineMessage(msg, data);
+  await ctx.reply(message, { reply_markup: { inline_keyboard: keyboard } });
+}
 
 // async function sharedGetPipelineCallback(ctx: Context) {
 //   await ctx.answerCbQuery();
@@ -104,11 +97,12 @@ async function _cancelPipelineCmd(ctx: Context) {
 
 const createPipelineCmd = errorWrapper(_createPipelineCmd);
 const cancelPipelineCmd = errorWrapper(_cancelPipelineCmd);
+const getPipelineCmd = errorWrapper(_getPipelinesCmd);
+const removePipelineCmd = errorWrapper(_removePipelineCmd);
 
 export {
   createPipelineCmd,
   cancelPipelineCmd,
-  // getPipelinesHandler,
-  // removePipelineHandler,
-  // sharedGetPipelineCallback,
+  getPipelineCmd,
+  removePipelineCmd,
 };
