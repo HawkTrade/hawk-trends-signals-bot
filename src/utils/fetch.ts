@@ -4,6 +4,7 @@ import {
   TWITTER_ACCOUNTS_ENDPOINT,
   TWITTER_API_KEY,
 } from "../constants";
+import { HawkApiResponse } from "../models/twitter.api";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -12,7 +13,7 @@ interface FetchOptions {
   body?: object | undefined;
 }
 
-class CustomFetch {
+class CustomFetch<H = unknown> {
   private baseUrl: string;
   private apiKey: string;
 
@@ -60,32 +61,33 @@ class CustomFetch {
     return data as T;
   }
 
-  get<T>(endpoint: string, options?: FetchOptions) {
+  get<T = H>(endpoint: string, options?: FetchOptions) {
     return this.request<T>(endpoint, "GET", options);
   }
 
-  post<T>(endpoint: string, body?: object, options?: FetchOptions) {
+  post<T = H>(endpoint: string, body?: object, options?: FetchOptions) {
     return this.request<T>(endpoint, "POST", { ...options, body });
   }
 
-  patch<T>(endpoint: string, body?: object, options?: FetchOptions) {
+  patch<T = H>(endpoint: string, body?: object, options?: FetchOptions) {
     return this.request<T>(endpoint, "PATCH", { ...options, body });
   }
 
-  put<T>(endpoint: string, body?: object, options?: FetchOptions) {
+  put<T = H>(endpoint: string, body?: object, options?: FetchOptions) {
     return this.request<T>(endpoint, "PUT", { ...options, body });
   }
 
-  delete<T>(endpoint: string, body?: object, options?: FetchOptions) {
+  delete<T = H>(endpoint: string, body?: object, options?: FetchOptions) {
     return this.request<T>(endpoint, "DELETE", { ...options, body });
   }
 }
 
 const TwitterApi = new CustomFetch(BASE_TWITTER_API, TWITTER_API_KEY);
 const MobulaApi = new CustomFetch(TWITTER_ACCOUNTS_ENDPOINT, "");
-const HawkSignalsAndTrendsAPI = new CustomFetch(
-  "https://hawk-trends-signals.up.railway.app",
+const HawkApi = new CustomFetch<HawkApiResponse>(
+  // "https://hawk-trends-signals.up.railway.app",
+  "https://87bbb7c30634.ngrok-free.app",
   BOT_TOKEN
 );
 
-export { TwitterApi, MobulaApi, HawkSignalsAndTrendsAPI };
+export { TwitterApi, MobulaApi, HawkApi };

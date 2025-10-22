@@ -20,7 +20,7 @@ type FilterRules = TwitterApiResponse & {
   rules: FilterRule[];
 };
 
-type HawkSignalsAndTrendsAPIResponse<T = string[]> = Partial<{
+type HawkApiResponse<T = string[]> = Partial<{
   data: T;
   msg: string;
   error: string;
@@ -31,5 +31,5 @@ export type {
   FilterRuleUpdateRequest,
   TwitterApiResponse,
   FilterRules,
-  HawkSignalsAndTrendsAPIResponse,
+  HawkApiResponse,
 };

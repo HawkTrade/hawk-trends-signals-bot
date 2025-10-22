@@ -1,5 +1,5 @@
 import type { Context } from "../models/telegraf.model";
-import { adminCheck } from "./utils";
+import { adminCheck } from "../utils/utils";
 
 const cmd = "Please select the source";
 const keyboards = (action: "add" | "rem" | "get") => {

@@ -5,4 +5,11 @@ export interface SessionRow {
 export interface Pipeline {
   pipeline: string;
   strategyId: string;
+  name: string;
+}
+
+export interface CreatePipeline {
+  pipeline: string;
+  description: string;
+  brands: [string];
 }

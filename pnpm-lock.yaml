@@ -8,6 +8,9 @@ dependencies:
   '@fastify/env':
     specifier: ^5.0.2
     version: 5.0.2
+  '@isaacs/ttlcache':
+    specifier: ^1.4.1
+    version: 1.4.1
   better-sqlite3:
     specifier: ^12.2.0
     version: 12.2.0
@@ -102,6 +105,11 @@ packages:
     dependencies:
       '@fastify/forwarded': 3.0.0
       ipaddr.js: 2.2.0
+    dev: false
+
+  /@isaacs/ttlcache@1.4.1:
+    resolution: {integrity: sha512-RQgQ4uQ+pLbqXfOmieB91ejmLwvSgv9nLx6sT6sD83s7umBypgg+OIBOBbEUiJXrfpnp9j0mRhYYdzp9uqq3lA==}
+    engines: {node: '>=12'}
     dev: false
 
   /@telegraf/types@7.1.0:

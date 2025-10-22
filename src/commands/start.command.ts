@@ -1,15 +1,12 @@
-import { ADMIN_IDS } from "../constants";
 import type { Context } from "../models/telegraf.model";
-import { getDefaultSession } from "../utils";
+import { getDefaultSession, to_delete } from "../utils";
 import botCommands from "./commands";
 
 async function startCmd(ctx: Context) {
   try {
     if (!ctx.message) return null;
-    const fromId = ctx.message.from.id;
-
-    const isAdmin = ADMIN_IDS.includes(fromId);
-    if (isAdmin) ctx.session = getDefaultSession();
+    await to_delete(ctx);
+    ctx.session = getDefaultSession();
 
     await ctx.reply("Hello 🫡");
   } catch (error) {

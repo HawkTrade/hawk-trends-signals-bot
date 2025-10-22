@@ -1,9 +1,8 @@
 import type { Context } from "../models/telegraf.model";
-import { HawkSignalsAndTrendsAPI as HSTAPI } from "../utils/fetch";
-import type { HawkSignalsAndTrendsAPIResponse as Res } from "../models/twitter.api";
-
+import { HawkApiResponse } from "../models/twitter.api";
+import { HawkApi } from "./fetch";
 async function getAdmins() {
-  const { data } = await HSTAPI.get<Res<number[]>>("/admin");
+  const { data } = await HawkApi.get<HawkApiResponse<number[]>>("/admin");
   return data || [];
 }
 
