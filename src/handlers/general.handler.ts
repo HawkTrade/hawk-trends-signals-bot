@@ -1,6 +1,6 @@
 import { fmt, mention } from "telegraf/format";
 import cache from "../db/cache";
-import type { Action, Context, Parser, Source } from "../models/telegraf.model";
+import type { Context, Parser, Source } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
 import { errorWrapper } from "../utils/helpers";
 import { getDefaultSession, to_delete } from "../utils";
@@ -51,18 +51,15 @@ async function _addParserMsg(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message))
     throw new Error("No message in text");
   const text = ctx.message.text;
-  const [source, action] = ctx.session.parser_action!.split(":") as [
-    Parser,
-    Action
-  ];
+  const [parser] = ctx.session.parser_action!.split(":") as [Parser];
 
   const pipeline = ctx.session.pipeline;
-  const body = { value: text, source, pipeline };
+  const body = { pattern: text, prompt: text, pipeline };
 
   ctx.session.pipeline = null;
-  const method = action === "add" ? "post" : "delete";
+  const path = parser == "llm" ? "/prompt" : "/regex";
 
-  const { msg, error } = await HawkApi[method]("source", body);
+  const { msg, error } = await HawkApi.post(path, body);
   if (error) throw error;
   if (!msg) throw new Error("API response is malformed!");
 
