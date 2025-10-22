@@ -39,7 +39,7 @@ async function _addSourceMsg(ctx: Context) {
 
   ctx.session.pipeline = null;
 
-  const { msg, error } = await HawkApi.post("source", body);
+  const { msg, error } = await HawkApi.post("/source", body);
   if (error) throw error;
   if (!msg) throw new Error("API response is malformed!");
 
