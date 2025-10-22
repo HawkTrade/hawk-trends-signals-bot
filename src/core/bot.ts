@@ -11,17 +11,6 @@ import {
   removeSourceCmd,
   getSourcesCmd,
 } from "../commands/source.command";
-// import {
-//   selectSourceCallback,
-//   sourceCallback,
-//   selectPipelineCallback,
-// } from "../_handlers/source.callback";
-// import {
-//   addRegexHandler,
-//   getPromptsHandler,
-//   getRegexHandler,
-//   removeRegexHandler,
-//   setPromptHandler,
 import {
   getAdminsCmd,
   removeAdminCmd,
@@ -47,6 +36,9 @@ import {
   removePipelineCb,
 } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/single.callbacks";
+import { sourceSelectedCb } from "../callbacks/source.callback";
+import { sourceMsg } from "../handlers/general.handler";
+import { selectedPipelineCb } from "../callbacks/shared_pipeline.callback";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN } = fastify.config;
@@ -73,10 +65,10 @@ async function init(fastify: FastifyInstance) {
         bot.command("remove_source", removeSourceCmd);
         bot.command("get_sources", getSourcesCmd);
 
-        // bot.action(
-        //   /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
-        //   selectSourceCallback
-        // );
+        bot.action(
+          /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
+          sourceSelectedCb
+        );
 
         // bot.command("add_regex", addRegexHandler);
         // bot.command("remove_regex", removeRegexHandler);
@@ -101,13 +93,13 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(pipeline_create):(confirm|cancel)$/, createPipelineCb);
         bot.action(/^(remove_pipeline):(.+)$/, removePipelineCb);
         bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
+        bot.action(/^(selected_pipeline):(.+)$/, selectedPipelineCb); // Shared across parsers and sources
 
         // bot.action(/^(regex_remove):(.+)$/, removeRegexCallback);
-        // bot.action(/^(pipeline_remove):(.+)$/, removePipelineCallback);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;
-          // if (state === "source_action") await sourceCallback(ctx);
+          if (state === "source_action") await sourceMsg(ctx, next);
           // else if (state === "parser_action") await parserCallback(ctx);
           if (state === "pipeline_create") await createPipelineMsg(ctx, next);
           return await next();

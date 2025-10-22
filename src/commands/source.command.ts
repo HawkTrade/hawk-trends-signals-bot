@@ -1,6 +1,7 @@
-import type { Action, Context } from "../models/telegraf.model";
+import type { Action as Act, Context } from "../models/telegraf.model";
 import { errorWrapper, validateCallerIsAdmin } from "../utils/helpers";
 
+type Action = Act | `get:pipeline`;
 const cmd = "Please select the source";
 const keyboards = (action: Action) => {
   return [
@@ -34,5 +35,11 @@ const makeSourceCmd = (action: Action) =>
 const addSourceCmd = makeSourceCmd("add");
 const removeSourceCmd = makeSourceCmd("rem");
 const getSourcesCmd = makeSourceCmd("get");
+const getSourcesForPipelineCmd = makeSourceCmd("get:pipeline");
 
-export { addSourceCmd, removeSourceCmd, getSourcesCmd };
+export {
+  addSourceCmd,
+  removeSourceCmd,
+  getSourcesCmd,
+  getSourcesForPipelineCmd,
+};
