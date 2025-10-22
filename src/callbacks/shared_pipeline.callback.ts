@@ -24,6 +24,9 @@ async function _selectedPipelineCb(ctx: Context) {
   const { source_action, parser_action } = ctx.session;
   ctx.session.pipeline = pipeline;
 
+  await ctx.answerCbQuery();
+  await ctx.deleteMessage();
+
   if (source_action) {
     const [source, action] = source_action.split(":") as [Source, Action];
     switch (action) {
