@@ -56,7 +56,7 @@ async function getAdmins() {
   const { data } = await HawkApi.get<HawkApiResponse<number[]>>("/admin");
   if (!data) return [];
 
-  cache.set("admins", data.join(","), { ttl: ONE_WEEK * 4 });
+  cache.set("admins", data.join(","), { ttl: ONE_WEEK * 3 });
   return data;
 }
 
