@@ -6,16 +6,20 @@ import {
   createPipelineSummary,
   describePipelineMessage,
   selectBrandForPipelineMessage,
+  requiresConfig,
 } from "../messages/pipeline.messages";
 import {
   actionCreatePipelineKeyboard,
   selectBrandForPipelineKeyboard,
+  setupTradeConfiguration,
 } from "../keyboards/pipeline.keyboards";
 
 const CREATE_PIPELINE_STEPS: (keyof CreatePipeline)[] = [
   "pipeline",
   "description",
   "brands",
+  "tp",
+  "sl",
 ];
 
 function getNextStep(data: Partial<CreatePipeline>) {
@@ -55,6 +59,37 @@ async function _createPipelineMsg(ctx: Context) {
       break;
     case "brands":
       partial.brands = [text];
+      replyId = (
+        await ctx.reply(requiresConfig, {
+          reply_markup: setupTradeConfiguration,
+        })
+      ).message_id;
+      break;
+    case "tp":
+      if (Number.isInteger(parseInt(text))) {
+        partial.tp = Number(text);
+        replyId = (
+          await ctx.reply(
+            "Please enter a numerical value for the default percentage stop loss (e.g: 50 for 50%)"
+          )
+        ).message_id;
+      } else {
+        if (text.toLowerCase() === "yes") {
+          replyId = (
+            await ctx.reply(
+              "Please enter a numerical value for the default percentage take profit (e.g: 500 for 500%)"
+            )
+          ).message_id;
+        } else {
+          const message = createPipelineSummary(partial);
+          await ctx.reply(message, {
+            reply_markup: actionCreatePipelineKeyboard,
+          });
+        }
+      }
+      break;
+    case "sl":
+      partial.sl = Number(text);
       const message = createPipelineSummary(partial);
       await ctx.reply(message, {
         reply_markup: actionCreatePipelineKeyboard,

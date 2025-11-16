@@ -39,8 +39,15 @@ const selectBrandForPipelineKeyboard = {
   one_time_keyboard: true,
 };
 
+const setupTradeConfiguration = {
+  keyboard: [[{ text: "Yes" }, { text: "No" }]],
+  resize_keyboard: true,
+  one_time_keyboard: true,
+};
+
 export {
   pipelinesKeyboard,
   actionCreatePipelineKeyboard,
   selectBrandForPipelineKeyboard,
+  setupTradeConfiguration,
 };

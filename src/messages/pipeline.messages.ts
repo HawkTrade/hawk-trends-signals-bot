@@ -20,6 +20,14 @@ const selectBrandForPipelineMessage = fmt`${bold("Almost done!")}
 Please select the brand this pipeline belongs to from the keyboard below.
 ${italic("Custom brand entries aren’t supported just yet 🫠")}`;
 
+const requiresConfig = fmt`${bold`Do you want to set trade Config?`}
+
+Trade configuration options for default take profit and stop loss (in percentage) will activate after you select/type Yes
+Trade config options are only used if LLM/Regex parsing doesn't pick up a take profit or stop loss value from its message source!
+
+${italic`Selecting/Typing No and any other text will assume negative and proceed to show you a summary for your new pipeline!`}
+`;
+
 function createPipelineSummary(pipeline: CreatePipeline, original = true) {
   return fmt`
 ${bold("Here’s a summary of your new pipeline:")}
@@ -27,6 +35,10 @@ ${bold("Here’s a summary of your new pipeline:")}
 ${bold("Title:")} ${pipeline.pipeline}
 ${bold("Description:")} ${pipeline.description}
 ${bold("Brand:")} ${pipeline.brands[0]}
+
+${bold`Trade Configuration Details`}
+${bold`Take Profit %`} ${pipeline.tp ?? "Not Set"}
+${bold`Stop Loss %`} ${pipeline.sl ?? "Not Set"}
 
 ${
   original
@@ -71,7 +83,9 @@ function fullPipelineMessage(
       fmt`
 ${bold(`${i + 1}. ${p.name}`)}
   ${italic(p.description)}
-  ${bold("Brands:")} ${p.brands[0]}`
+  ${bold("Brands:")} ${p.brands[0]}
+${p.tp ? `${bold`Take Profit %:`} ${p.tp}` : ""}
+${p.tp ? `${bold`Stop Loss %:`} ${p.sl}` : ""}`
   );
 
   return fmt`${bold(msg)}
@@ -95,6 +109,7 @@ export {
   selectBrandForPipelineMessage,
   createPipelineMessage,
   describePipelineMessage,
+  requiresConfig,
   createPipelineSummary,
   localPipelineMessage,
   fullPipelineMessage,
