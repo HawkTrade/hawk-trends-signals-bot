@@ -49,7 +49,7 @@ ${
 }`;
 }
 
-type LocalPipelineAction = "remove" | "view";
+type LocalPipelineAction = "remove" | "view" | "edit";
 function localPipelineMessage(
   pipelines: LocalPipeline[] | undefined,
   action: LocalPipelineAction

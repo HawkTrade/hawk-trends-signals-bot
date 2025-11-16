@@ -78,13 +78,13 @@ async function _getPipelinesCmd(ctx: Context) {
 
 async function _editPipelineCmd(ctx: Context) {
   await validateCallerIsAdmin(ctx);
-  const { data, error, msg } = await HawkApi.get<HawkApiResponse<Pipeline[]>>(
+  const { data, error } = await HawkApi.get<HawkApiResponse<Pipeline[]>>(
     "/pipeline?with_hawk=false"
   );
   if (error) throw error;
 
   const keyboard = pipelinesKeyboard(data, "edit_pipeline");
-  const message = fullPipelineMessage(msg, data);
+  const message = localPipelineMessage(data, "edit");
   await ctx.reply(message, { reply_markup: { inline_keyboard: keyboard } });
 }
 
