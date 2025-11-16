@@ -1,5 +1,5 @@
 import type { Context } from "../models/telegraf.model";
-import type { CreatePipeline } from "../models/db.model";
+import type { CreatePipeline, EditPipeline } from "../models/db.model";
 import { errorWrapper, groupOrSuperGroupChecker } from "../utils/helpers";
 import cache from "../db/cache";
 import {
@@ -13,6 +13,8 @@ import {
   selectBrandForPipelineKeyboard,
   setupTradeConfiguration,
 } from "../keyboards/pipeline.keyboards";
+import { HawkApi } from "../utils/fetch";
+import type { HawkApiResponse } from "../models/twitter.api";
 
 const CREATE_PIPELINE_STEPS: (keyof CreatePipeline)[] = [
   "pipeline",
@@ -104,6 +106,48 @@ async function _createPipelineMsg(ctx: Context) {
   cache.set(key, JSON.stringify(partial));
 }
 
-const createPipelineMsg = errorWrapper(_createPipelineMsg);
+async function _editPipelineMsg(ctx: Context) {
+  if (!ctx.message || !("text" in ctx.message))
+    throw new Error("No message was provided");
 
-export { createPipelineMsg };
+  const text = ctx.message.text.trim();
+  const key = groupOrSuperGroupChecker(ctx);
+
+  if (!cache.has(key))
+    throw new Error(
+      "Pipeline edit cache is seemingly empty and may have expired! Please restart the process"
+    );
+
+  const partial: EditPipeline = JSON.parse(cache.get(key) || "{}");
+  if (!partial.pipeline)
+    throw new Error("Pipeline edit session is corrupted with missing fields.");
+
+  if (!partial.tp) {
+    partial.tp = Number(text);
+    const { message_id } = await ctx.reply(
+      "Please enter a numerical value for the default percentage stop loss (e.g: 50 for 50%)"
+    );
+    ctx.session.toDelete.push(message_id);
+    cache.set(key, JSON.stringify(partial));
+  } else {
+    partial.sl = Number(text);
+    await ctx.sendChatAction("typing");
+
+    const { pipeline, ...config } = partial;
+    const { error, msg } = await HawkApi.patch<HawkApiResponse>(
+      "/pipeline/" + pipeline,
+      config
+    );
+    if (error) throw error;
+    if (!msg) throw new Error("There is an error with the API response");
+
+    cache.delete(key);
+    ctx.session.state = "idle";
+    await ctx.reply(msg);
+  }
+}
+
+const createPipelineMsg = errorWrapper(_createPipelineMsg);
+const editPipelineMsg = errorWrapper(_editPipelineMsg);
+
+export { createPipelineMsg, editPipelineMsg };

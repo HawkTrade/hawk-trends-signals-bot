@@ -1,9 +1,9 @@
 import type { LocalPipeline } from "../models/db.model";
 
-type PipelineCallback = "remove_pipeline" | "get_pipeline";
+type PipelineCallback = "remove_pipeline" | "get_pipeline" | "edit_pipeline";
 function pipelinesKeyboard(
   pipelines: LocalPipeline[] | undefined,
-  callback: PipelineCallback = "get_pipeline"
+  callback: PipelineCallback
 ) {
   if (!pipelines || !pipelines.length) return [];
 

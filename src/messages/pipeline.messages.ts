@@ -83,9 +83,9 @@ function fullPipelineMessage(
       fmt`
 ${bold(`${i + 1}. ${p.name}`)}
   ${italic(p.description)}
-  ${bold("Brands:")} ${p.brands[0]}
-${p.tp ? `${bold`Take Profit %:`} ${p.tp}` : ""}
-${p.tp ? `${bold`Stop Loss %:`} ${p.sl}` : ""}`
+  ${bold("Brands:")} ${p.brands[0]}${
+        p.takeProfit ? `\n${bold`Take Profit %:`} ${p.takeProfit}` : ""
+      }${p.stopLoss ? `\n${bold`Stop Loss %:`} ${p.stopLoss}` : ""}`
   );
 
   return fmt`${bold(msg)}
@@ -100,6 +100,10 @@ ${bold("Name:")} ${pipeline.name}
 ${bold("Description:")} ${pipeline.description}
 ${bold("Brand:")} ${pipeline.brands[0]}
 ${bold("Strategy ID:")} ${spoiler`${pipeline.strategyId}`}
+
+${bold`Trade Configuration Details`}
+${bold`Take Profit %`} ${pipeline.takeProfit ?? "Not Set"}
+${bold`Stop Loss %`} ${pipeline.stopLoss ?? "Not Set"}
 
 Created at: ${italic(new Date(pipeline.created_at).toISOString())}
 Updated at: ${italic(new Date(pipeline.updated_at).toISOString())}`;

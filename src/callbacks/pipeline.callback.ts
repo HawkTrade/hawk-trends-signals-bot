@@ -76,8 +76,33 @@ async function _getPipelineCb(ctx: Context) {
   await ctx.editMessageText(getPipelineSummary(msg, data));
 }
 
+async function _editPipelineCb(ctx: Context) {
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("No data in the callback. Please call start");
+
+  const [, pipeline] = ctx.callbackQuery.data.split(":");
+  if (!pipeline) throw new Error("No pipeline was found in the callback");
+
+  await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+  await ctx.answerCbQuery();
+  const key = groupOrSuperGroupChecker(ctx);
+
+  const pipeline_in_cache = cache.get(key);
+  if (pipeline_in_cache)
+    throw new Error(
+      "A pipeline is already being created/edited. Please call /cancel_pipeline_creation to restart the process!"
+    );
+
+  cache.set(key, JSON.stringify({ pipeline }));
+  ctx.session.state = "pipeline_edit";
+  await ctx.editMessageText(
+    "Please enter a numerical value for the default percentage take profit (e.g: 500 for 500%)"
+  );
+}
+
 const createPipelineCb = errorWrapper(_actionCreatePipelineCb);
 const removePipelineCb = errorWrapper(_removePipelineCb);
 const getPipelineCb = errorWrapper(_getPipelineCb);
+const editPipelineCb = errorWrapper(_editPipelineCb);
 
-export { createPipelineCb, removePipelineCb, getPipelineCb };
+export { createPipelineCb, removePipelineCb, getPipelineCb, editPipelineCb };

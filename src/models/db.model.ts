@@ -7,14 +7,20 @@ export interface CreatePipeline {
   description: string;
   brands: [string];
   tp?: number;
+  sl?: number;
+}
+
+export interface EditPipeline {
+  pipeline: string;
+  tp: number;
   sl: number;
 }
 type LocalPipeline = {
   pipeline: string;
   strategyId: string;
   name: string;
-  tp?: number;
-  sl: number;
+  takeProfit?: number;
+  stopLoss: number;
 };
 
 type ExternalPipeline = {

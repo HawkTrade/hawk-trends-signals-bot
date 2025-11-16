@@ -13,6 +13,7 @@ interface Session {
     | "source_action"
     | "parser_action"
     | "pipeline_create"
+    | "pipeline_edit"
     | "admin_add";
   source_action: `${Source}:${Action}` | null;
   parser_action: `${Parser}:${Action}` | null;

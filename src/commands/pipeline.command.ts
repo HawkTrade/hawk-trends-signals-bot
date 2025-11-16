@@ -76,14 +76,28 @@ async function _getPipelinesCmd(ctx: Context) {
   await ctx.reply(message, { reply_markup: { inline_keyboard: keyboard } });
 }
 
+async function _editPipelineCmd(ctx: Context) {
+  await validateCallerIsAdmin(ctx);
+  const { data, error, msg } = await HawkApi.get<HawkApiResponse<Pipeline[]>>(
+    "/pipeline?with_hawk=false"
+  );
+  if (error) throw error;
+
+  const keyboard = pipelinesKeyboard(data, "edit_pipeline");
+  const message = fullPipelineMessage(msg, data);
+  await ctx.reply(message, { reply_markup: { inline_keyboard: keyboard } });
+}
+
 const createPipelineCmd = errorWrapper(_createPipelineCmd);
 const cancelPipelineCmd = errorWrapper(_cancelPipelineCmd);
 const getPipelinesCmd = errorWrapper(_getPipelinesCmd);
 const removePipelineCmd = errorWrapper(_removePipelineCmd);
+const editPipelineCmd = errorWrapper(_editPipelineCmd);
 
 export {
   createPipelineCmd,
   cancelPipelineCmd,
   getPipelinesCmd,
   removePipelineCmd,
+  editPipelineCmd,
 };

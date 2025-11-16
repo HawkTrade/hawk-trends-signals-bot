@@ -21,13 +21,18 @@ import {
   cancelPipelineCmd,
   removePipelineCmd,
   getPipelinesCmd,
+  editPipelineCmd,
 } from "../commands/pipeline.command";
 import type { Update } from "telegraf/typings/core/types/typegram";
-import { createPipelineMsg } from "../handlers/pipeline.handler";
+import {
+  createPipelineMsg,
+  editPipelineMsg,
+} from "../handlers/pipeline.handler";
 import {
   createPipelineCb,
   getPipelineCb,
   removePipelineCb,
+  editPipelineCb,
 } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/admin.callback";
 import {
@@ -95,11 +100,13 @@ async function init(fastify: FastifyInstance) {
         bot.command("create_pipeline", createPipelineCmd);
         bot.command("cancel_pipeline_creation", cancelPipelineCmd);
         bot.command("get_pipelines", getPipelinesCmd);
+        bot.command("edit_pipeline", editPipelineCmd);
         bot.command("remove_pipeline", removePipelineCmd);
 
         bot.action(/^(pipeline_create):(confirm|cancel)$/, createPipelineCb);
         bot.action(/^(remove_pipeline):(.+)$/, removePipelineCb);
         bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
+        bot.action(/^(edit_pipeline):(.+)$/, editPipelineCb);
         bot.action(/^(selected_pipeline):(.+)$/, selectedPipelineCb); // Shared across parsers and sources
 
         bot.on("message", async (ctx, next) => {
@@ -113,6 +120,9 @@ async function init(fastify: FastifyInstance) {
               break;
             case "pipeline_create":
               await createPipelineMsg(ctx, next);
+              break;
+            case "pipeline_edit":
+              await editPipelineMsg(ctx, next);
               break;
 
             default:
