@@ -83,9 +83,9 @@ function fullPipelineMessage(
       fmt`
 ${bold(`${i + 1}. ${p.name}`)}
   ${italic(p.description)}
-  ${bold("Brands:")} ${p.brands[0]}$
-  ${bold`Take Profit %`} ${p.takeProfit ?? "Not Set"}
-  ${bold`Stop Loss %`} ${p.stopLoss ?? "Not Set"}
+  ${bold("Brands:")} ${p.brands[0]}
+  ${bold`Take Profit:`} % ${p.takeProfit ?? "Not Set"}
+  ${bold`Stop Loss:`} % ${p.stopLoss ?? "Not Set"}
   `
   );
 
