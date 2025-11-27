@@ -6,16 +6,8 @@ import type { FastifyInstance } from "fastify";
 import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../commands/start.command";
 import botCommands from "../commands/commands";
-import {
-  addSourceCmd,
-  removeSourceCmd,
-  getSourcesCmd,
-} from "../commands/source.command";
-import {
-  getAdminsCmd,
-  removeAdminCmd,
-  addAdminCmd,
-} from "../commands/admin.command";
+import { addSourceCmd, removeSourceCmd, getSourcesCmd } from "../commands/source.command";
+import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
 import {
   createPipelineCmd,
   cancelPipelineCmd,
@@ -24,30 +16,13 @@ import {
   editPipelineCmd,
 } from "../commands/pipeline.command";
 import type { Update } from "telegraf/typings/core/types/typegram";
-import {
-  createPipelineMsg,
-  editPipelineMsg,
-} from "../handlers/pipeline.handler";
-import {
-  createPipelineCb,
-  getPipelineCb,
-  removePipelineCb,
-  editPipelineCb,
-} from "../callbacks/pipeline.callback";
+import { createPipelineMsg, editPipelineMsg } from "../handlers/pipeline.handler";
+import { createPipelineCb, getPipelineCb, removePipelineCb, editPipelineCb } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/admin.callback";
-import {
-  removePipelineSourceCb,
-  sourceSelectedCb,
-} from "../callbacks/source.callback";
+import { removePipelineSourceCb, sourceSelectedCb } from "../callbacks/source.callback";
 import { addParserMsg, addSourceMsg } from "../handlers/general.handler";
 import { selectedPipelineCb } from "../callbacks/shared_pipeline.callback";
-import {
-  addRegexCmd,
-  getPromptCmd,
-  getRegexesCmd,
-  removeRegexCmd,
-  setPromptCmd,
-} from "../commands/parser.command";
+import { addRegexCmd, getPromptCmd, getRegexesCmd, removeRegexCmd, setPromptCmd } from "../commands/parser.command";
 import { removePipelineRegexCb } from "../callbacks/parser.callback";
 
 async function init(fastify: FastifyInstance) {
@@ -75,10 +50,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("remove_source", removeSourceCmd);
         bot.command("get_sources", getSourcesCmd);
 
-        bot.action(
-          /^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/,
-          sourceSelectedCb
-        );
+        bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/, sourceSelectedCb);
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
 
@@ -100,7 +72,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("create_pipeline", createPipelineCmd);
         bot.command("cancel_pipeline_creation", cancelPipelineCmd);
         bot.command("get_pipelines", getPipelinesCmd);
-        bot.command("edit_pipeline", editPipelineCmd);
+        bot.command("edit_pipeline_parameters", editPipelineCmd);
         bot.command("remove_pipeline", removePipelineCmd);
 
         bot.action(/^(pipeline_create):(confirm|cancel)$/, createPipelineCb);
