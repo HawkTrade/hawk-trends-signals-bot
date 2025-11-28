@@ -44,3 +44,5 @@ function buildPaginatedKeyboard<T>({
     totalPages,
   };
 }
+
+export { buildPaginatedKeyboard };

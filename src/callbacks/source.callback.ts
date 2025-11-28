@@ -7,6 +7,7 @@ import { sharedSelectPipelineCb_ } from "./shared_pipeline.callback";
 import { bold, fmt, italic } from "telegraf/format";
 import { getDefaultSession } from "../utils";
 import cache from "../db/cache";
+import { buildPaginatedKeyboard } from "../keyboards/source.keyboards";
 
 async function _sourceSelectedCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
