@@ -20,7 +20,7 @@ const botCommands: BotCommand[] = [
   { command: "remove_pipeline", description: "Remove an existing pipeline" },
   { command: "get_pipelines", description: "List all available pipelines" },
   {
-    command: "edit_pipeline_parameters",
+    command: "edit_pipeline_tp_sl",
     description: "Edit trade config of an existing pipeline",
   },
   {

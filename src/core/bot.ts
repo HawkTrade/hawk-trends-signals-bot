@@ -72,7 +72,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("create_pipeline", createPipelineCmd);
         bot.command("cancel_pipeline_creation", cancelPipelineCmd);
         bot.command("get_pipelines", getPipelinesCmd);
-        bot.command("edit_pipeline_parameters", editPipelineCmd);
+        bot.command("edit_pipeline_tp_sl", editPipelineCmd);
         bot.command("remove_pipeline", removePipelineCmd);
 
         bot.action(/^(pipeline_create):(confirm|cancel)$/, createPipelineCb);
