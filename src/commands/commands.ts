@@ -8,6 +8,7 @@ const botCommands: BotCommand[] = [
     command: "get_sources",
     description: "List all the data sources for a given source",
   },
+  { command: "get_pipeline_sources", description: "Get all data sources peculiar to a pipeline" },
   { command: "add_regex", description: "Add a new regex pattern for parsing" },
   { command: "remove_regex", description: "Remove an existing regex pattern" },
   { command: "get_regexes", description: "List all regex patterns" },

@@ -1,5 +1,6 @@
 import fastifyEnv from "@fastify/env";
 import type { FastifyInstance } from "fastify";
+import path from "path";
 
 const schema = {
   type: "object",
@@ -15,7 +16,10 @@ const schema = {
 
 const options = {
   schema,
-  dotenv: true,
+  // dotenv: true,
+  dotenv: {
+    path: path.join(process.cwd(), ".env.local"),
+  },
 };
 
 type BuildSchema<

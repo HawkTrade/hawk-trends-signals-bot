@@ -1,6 +1,13 @@
 import type { Session, Context } from "../models/telegraf.model";
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+
+const isProd = process.env.NODE_ENV === "production";
+const envFile = isProd ? ".env" : ".env.local";
+
+dotenv.config({
+  path: path.resolve(process.cwd(), envFile),
+});
 
 function getEnv(key: string) {
   const value = process.env[key];

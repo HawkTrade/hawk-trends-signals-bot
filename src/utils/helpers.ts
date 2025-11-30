@@ -13,9 +13,7 @@ function errorWrapper(handler: MiddlewareFn<Context>): MiddlewareFn<Context> {
       const originalAnswerCbQuery = ctx.answerCbQuery.bind(ctx);
       ctx._cbAnswered = false;
 
-      ctx.answerCbQuery = async (
-        ...args: Parameters<typeof ctx.answerCbQuery>
-      ) => {
+      ctx.answerCbQuery = async (...args: Parameters<typeof ctx.answerCbQuery>) => {
         ctx._cbAnswered = true;
         return await originalAnswerCbQuery(...args);
       };
@@ -23,6 +21,7 @@ function errorWrapper(handler: MiddlewareFn<Context>): MiddlewareFn<Context> {
       await handler(ctx, next);
     } catch (error) {
       console.error(`${functionName} error:`, error);
+      ctx.fastify.log.error(`${functionName} error: ${JSON.stringify(error)}`);
       const message = error instanceof Error ? error.message : String(error);
 
       const error_message = `⚠️ ${message}`;

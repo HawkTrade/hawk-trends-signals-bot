@@ -12,7 +12,11 @@ import { buildPaginatedKeyboard } from "../keyboards/source.keyboards";
 async function _sourceSelectedCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
-  const [source, action, pipeline] = ctx.callbackQuery.data.split(":") as [Source, Action, string | undefined];
+  const [source, action, pipeline] = ctx.callbackQuery.data.split(":") as [
+    Source,
+    Action | "get_pip",
+    string | undefined
+  ];
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
 
@@ -21,14 +25,14 @@ async function _sourceSelectedCb(ctx: Context) {
     const { data, msg, error } = await HawkApi.get("/source/" + source);
     if (error) throw error;
 
-    const sources = (source === "telegram" || source === "tg_bot") && data ? await getChannelNames(data, ctx) : data;
-    const message = getSourcesMessage(msg, sources);
+    const message = getSourcesMessage(msg, data);
 
     await ctx.reply(message);
     return;
   }
 
-  ctx.session.source_action = `${source}:${action}`;
+  const cleanAction = action === "get_pip" ? "get" : action;
+  ctx.session.source_action = `${source}:${cleanAction}`;
   await sharedSelectPipelineCb_(ctx);
 }
 
@@ -37,8 +41,7 @@ async function getPipelineSourceCb_(ctx: Context, source: Source, pipeline: stri
   const { data, msg, error } = await HawkApi.get(`/source?source=${source}&pipeline=${pipeline}`);
   if (error) throw error;
 
-  const sources = (source === "telegram" || source === "tg_bot") && data ? await getChannelNames(data, ctx) : data;
-  const message = getSourcesMessage(msg, sources);
+  const message = getSourcesMessage(msg, data);
 
   await ctx.reply(message);
 }

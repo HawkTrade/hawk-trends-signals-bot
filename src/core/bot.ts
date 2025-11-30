@@ -6,7 +6,7 @@ import type { FastifyInstance } from "fastify";
 import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../commands/start.command";
 import botCommands from "../commands/commands";
-import { addSourceCmd, removeSourceCmd, getSourcesCmd } from "../commands/source.command";
+import { addSourceCmd, removeSourceCmd, getSourcesCmd, getSourcesForPipelineCmd } from "../commands/source.command";
 import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
 import {
   createPipelineCmd,
@@ -49,8 +49,9 @@ async function init(fastify: FastifyInstance) {
         bot.command("add_source", addSourceCmd);
         bot.command("remove_source", removeSourceCmd);
         bot.command("get_sources", getSourcesCmd);
+        bot.command("get_pipeline_sources", getSourcesForPipelineCmd);
 
-        bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get)$/, sourceSelectedCb);
+        bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get|get_pip)$/, sourceSelectedCb);
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
 
@@ -105,12 +106,6 @@ async function init(fastify: FastifyInstance) {
 
         bot.context.fastify = fastify;
 
-        // bot.launch(() => console.log("Bot is running..."));
-        const webhookPath = "/telegram";
-        const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
-
-        await bot.telegram.setWebhook(webhookUrl);
-
         await bot.telegram.deleteMyCommands();
         await Promise.all([
           bot.telegram.setMyCommands(botCommands, {
@@ -127,10 +122,27 @@ async function init(fastify: FastifyInstance) {
           }),
         ]);
 
-        fastify.post(webhookPath, async (request, reply) => {
-          await bot.handleUpdate(request.body as Update);
-          return reply.send({ ok: true });
-        });
+        const isProd = process.env.NODE_ENV === "production";
+
+        if (isProd) {
+          const webhookPath = "/telegram";
+          const webhookUrl = `${WEBHOOK_URL}${webhookPath}`;
+
+          await bot.telegram.setWebhook(webhookUrl);
+
+          fastify.post(webhookPath, async (request, reply) => {
+            await bot.handleUpdate(request.body as Update);
+            return reply.send({ ok: true });
+          });
+        } else {
+          fastify.log.info("Starting in POLLING mode...");
+
+          await bot.telegram.deleteWebhook();
+          bot.launch(() => console.log("Bot is running..."));
+
+          process.once("SIGINT", () => bot.stop("SIGINT"));
+          process.once("SIGTERM", () => bot.stop("SIGTERM"));
+        }
 
         fastify.decorate("bot", bot);
       },
