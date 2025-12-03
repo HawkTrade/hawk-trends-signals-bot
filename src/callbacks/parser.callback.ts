@@ -5,18 +5,14 @@ import { HawkApi } from "../utils/fetch";
 import { errorWrapper } from "../utils/helpers";
 import { getDefaultSession } from "../utils";
 
-async function getPipelineParserCb_(
-  ctx: Context,
-  parser: Parser,
-  pipeline: string
-) {
-  await ctx.sendChatAction("typing");
+async function getPipelineParserCb_(ctx: Context, parser: Parser, pipeline: string) {
   const path = parser === "llm" ? "prompt" : "regex";
+  await ctx.sendChatAction("typing");
+
   const { data, msg, error } = await HawkApi.get(`/${path}/${pipeline}`);
   if (error) throw error;
 
   const message = getParserMessage(msg, data);
-
   await ctx.reply(message);
 }
 
@@ -24,7 +20,7 @@ async function addPipelineParserCb_(ctx: Context, parser: Parser) {
   const msg =
     parser === "regex"
       ? "Please enter the regex: (wrong regex syntax and missing fields like asset and direction in syntax will result in an error)"
-      : "Please enter the new LLM prompt (LLM output must match TradeRequest, missing fields like asset and direction will throw an error)";
+      : "Please enter the new LLM prompt that parses the expected message";
 
   const { message_id } = await ctx.reply(msg, {
     reply_markup: { force_reply: true },
@@ -33,8 +29,17 @@ async function addPipelineParserCb_(ctx: Context, parser: Parser) {
   ctx.session.toDelete.push(message_id);
 }
 
-async function removePipelineRegexCb_(ctx: Context, pipeline: string) {
-  const { data, error, msg } = await HawkApi.get("/regex/" + pipeline);
+async function removePipelineParserCb_(ctx: Context, parser: Parser, pipeline: string) {
+  await ctx.sendChatAction("typing");
+  if (parser === "llm") {
+    const { error, msg } = await HawkApi.delete(`llm/${pipeline}`);
+    if (error) throw new Error(error);
+
+    await ctx.reply(msg!);
+    return;
+  }
+
+  const { data, msg, error } = await HawkApi.get(`/regex/${pipeline}`);
   if (error) throw error;
   if (!data || !msg) throw new Error("API response is malformed.");
 
@@ -58,8 +63,7 @@ async function removePipelineRegexCb_(ctx: Context, pipeline: string) {
 }
 
 async function _removePipelineRegexCb(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
-    throw new Error("Callback Query data is empty");
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
   const [, encoded] = ctx.callbackQuery.data.split(":") as [string, string];
   const pipeline = ctx.session.pipeline;
@@ -82,9 +86,4 @@ async function _removePipelineRegexCb(ctx: Context) {
 
 const removePipelineRegexCb = errorWrapper(_removePipelineRegexCb);
 
-export {
-  getPipelineParserCb_,
-  removePipelineRegexCb_,
-  addPipelineParserCb_,
-  removePipelineRegexCb,
-};
+export { getPipelineParserCb_, removePipelineParserCb_, addPipelineParserCb_, removePipelineRegexCb };

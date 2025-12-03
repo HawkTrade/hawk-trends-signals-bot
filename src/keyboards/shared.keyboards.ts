@@ -1,25 +1,26 @@
-function buildPaginatedKeyboard<T>({
-  items,
+import type { DataSource } from "../models/twitter.api";
+
+function buildPaginatedKeyboard({
+  data,
   page,
-  makeLabel,
   makeCallback,
   navPrefix,
 }: {
-  items: T[];
+  data: DataSource;
   page: number;
-  makeLabel: (item: T, index: number) => string;
-  makeCallback: (item: T, index: number) => string;
+  makeCallback: (item: string) => string;
   navPrefix: string;
 }) {
+  const { sources, labels } = data;
   const pageSize = 10;
-  const totalPages = Math.ceil(items.length / pageSize) || 1;
+  const totalPages = Math.ceil(sources.length / pageSize) || 1;
   const start = page * pageSize;
-  const pageItems = items.slice(start, start + pageSize);
+  const pageItems = sources.slice(start, start + pageSize);
 
-  const keyboard = pageItems.map((item, i) => [
+  const keyboard = pageItems.map((source, i) => [
     {
-      text: makeLabel(item, start + i),
-      callback_data: makeCallback(item, start + i),
+      text: labels[i] ?? source,
+      callback_data: makeCallback(source),
     },
   ]);
 

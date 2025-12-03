@@ -5,7 +5,7 @@ import { HawkApi } from "../utils/fetch";
 import { HawkApiResponse } from "../models/twitter.api";
 import { bold, fmt } from "telegraf/format";
 import { addPipelineSourceCb_, getPipelineSourceCb_, removePipelineSourceCb_ } from "./source.callback";
-import { addPipelineParserCb_, getPipelineParserCb_, removePipelineRegexCb_ } from "./parser.callback";
+import { addPipelineParserCb_, getPipelineParserCb_, removePipelineParserCb_ } from "./parser.callback";
 
 async function _selectedPipelineCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("No data in the callback query");
@@ -38,7 +38,7 @@ async function _selectedPipelineCb(ctx: Context) {
         await getPipelineParserCb_(ctx, parser, pipeline);
         break;
       case "rem":
-        if (parser === "regex") await removePipelineRegexCb_(ctx, pipeline);
+        await removePipelineParserCb_(ctx, parser, pipeline);
         break;
       case "add":
         await addPipelineParserCb_(ctx, parser);

@@ -1,13 +1,13 @@
 import type { Action, Context, Source } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
-import { getChannelNames } from "../utils/utils";
 import { errorWrapper } from "../utils/helpers";
 import { getSourcesMessage } from "../messages/sources_parsers.messages";
 import { sharedSelectPipelineCb_ } from "./shared_pipeline.callback";
 import { bold, fmt, italic } from "telegraf/format";
 import { getDefaultSession } from "../utils";
 import cache from "../db/cache";
-import { buildPaginatedKeyboard } from "../keyboards/source.keyboards";
+import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
+import type { DataSource, HawkApiResponse } from "../models/twitter.api";
 
 async function _sourceSelectedCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
@@ -32,6 +32,7 @@ async function _sourceSelectedCb(ctx: Context) {
   }
 
   const cleanAction = action === "get_pip" ? "get" : action;
+  ctx.session.parser_action = null;
   ctx.session.source_action = `${source}:${cleanAction}`;
   await sharedSelectPipelineCb_(ctx);
 }
@@ -69,34 +70,25 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
 
 async function removePipelineSourceCb_(ctx: Context, source: Source, pipeline: string) {
   await ctx.sendChatAction("typing");
-  const { data, msg, error } = await HawkApi.get(`/source?source=${source}&pipeline=${pipeline}`);
+  const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
+    `/source?source=${source}&pipeline=${pipeline}`
+  );
   if (error) throw error;
   if (!msg || !data) throw new Error("API response is malformed!");
 
-  const sources = (source === "telegram" || source === "tg_bot") && data ? await getChannelNames(data, ctx) : data;
-
   const { keyboard } = buildPaginatedKeyboard({
-    items: data,
+    data,
     page: 0,
-    makeLabel: (value, i) => sources[i] ?? value,
     makeCallback: (value) => `rem_src:${source}:${value}`,
     navPrefix: `rem_src:${source}`,
   });
 
-  cache.set("removePipelineSourceCb_sources", JSON.stringify(sources));
   cache.set("removePipelineSourceCb_data", JSON.stringify(data));
 
-  // const keyboard = data.slice(0, 2).map((value, i) => [
-  //   {
-  //     text: sources[i] ?? value,
-  //     callback_data: `rem_src:${source}:${value}`,
-  //   },
-  // ]);
   const message = fmt`${bold(msg)}
   
 ${italic`Select from the list below, the sources to remove`} 
   `;
-
   await ctx.reply(message, { reply_markup: { inline_keyboard: keyboard } });
 }
 
@@ -107,17 +99,14 @@ async function _removePipelineSourceCb(ctx: Context) {
   const pipeline = ctx.session.pipeline;
 
   if (value === "page") {
-    const _sources = cache.get(`removePipelineSourceCb_sources`);
     const _data = cache.get(`removePipelineSourceCb_data`);
 
-    if (!_sources || !_data) throw new Error("This keyboard is stale. Please call the command again");
-    const sources: string[] = JSON.parse(_sources);
-    const data: string[] = JSON.parse(_data);
+    if (!_data) throw new Error("This keyboard is stale. Please call the command again");
+    const data: DataSource = JSON.parse(_data);
 
     const { keyboard } = buildPaginatedKeyboard({
-      items: data,
+      data,
       page: Number(page),
-      makeLabel: (val, i) => sources[i] ?? val,
       makeCallback: (val) => `rem_src:${source}:${val}`,
       navPrefix: `rem_src:${source}`,
     });

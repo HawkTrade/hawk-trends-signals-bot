@@ -26,10 +26,16 @@ type HawkApiResponse<T = string[]> = Partial<{
   error: string;
 }>;
 
+type DataSource = {
+  sources: string[];
+  labels: string[];
+};
+
 export type {
   FilterRuleCreateResponse,
   FilterRuleUpdateRequest,
   TwitterApiResponse,
   FilterRules,
   HawkApiResponse,
+  DataSource,
 };
