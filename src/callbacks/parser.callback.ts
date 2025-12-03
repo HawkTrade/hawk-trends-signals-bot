@@ -45,10 +45,10 @@ async function removePipelineParserCb_(ctx: Context, parser: Parser, pipeline: s
 
   if (!data.length) throw new Error(msg + " to remove from");
 
-  const keyboard = data.map((pattern) => [
+  const keyboard = data.map((_, idx) => [
     {
-      text: pattern,
-      callback_data: `rem_rgx:${encodeURIComponent(pattern)}`,
+      text: `${idx}th Regex`,
+      callback_data: `rem_rgx:${idx}`,
     },
   ]);
 
@@ -65,16 +65,15 @@ async function removePipelineParserCb_(ctx: Context, parser: Parser, pipeline: s
 async function _removePipelineRegexCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
-  const [, encoded] = ctx.callbackQuery.data.split(":") as [string, string];
+  const [, index] = ctx.callbackQuery.data.split(":") as [string, string];
   const pipeline = ctx.session.pipeline;
-  const pattern = decodeURIComponent(encoded);
 
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
   await ctx.sendChatAction("typing");
 
   const { msg, error } = await HawkApi.delete("/regex", {
-    pattern,
+    idx: Number(index),
     pipeline,
   });
   if (error) throw error;
