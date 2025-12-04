@@ -20,9 +20,7 @@ async function to_delete(ctx: Context) {
     if (ctx.session.toDelete.length === 0) return;
     await ctx.sendChatAction("typing");
     await Promise.all(ctx.session.toDelete.map((id) => ctx.deleteMessage(id)));
-  } catch (error) {
-    console.error("error in toDelete helper", error);
-  }
+  } catch {}
 }
 
 const asyncPipe =

@@ -10,7 +10,8 @@ import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
 import type { DataSource, HawkApiResponse } from "../models/twitter.api";
 
 async function _sourceSelectedCb(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("Callback Query data is empty");
 
   const [source, action, pipeline] = ctx.callbackQuery.data.split(":") as [
     Source,
@@ -37,9 +38,15 @@ async function _sourceSelectedCb(ctx: Context) {
   await sharedSelectPipelineCb_(ctx);
 }
 
-async function getPipelineSourceCb_(ctx: Context, source: Source, pipeline: string) {
+async function getPipelineSourceCb_(
+  ctx: Context,
+  source: Source,
+  pipeline: string
+) {
   await ctx.sendChatAction("typing");
-  const { data, msg, error } = await HawkApi.get(`/source?source=${source}&pipeline=${pipeline}`);
+  const { data, msg, error } = await HawkApi.get(
+    `/source?source=${source}&pipeline=${pipeline}`
+  );
   if (error) throw error;
 
   const message = getSourcesMessage(msg, data);
@@ -68,7 +75,11 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
   ctx.session.toDelete.push(message_id);
 }
 
-async function removePipelineSourceCb_(ctx: Context, source: Source, pipeline: string) {
+async function removePipelineSourceCb_(
+  ctx: Context,
+  source: Source,
+  pipeline: string
+) {
   await ctx.sendChatAction("typing");
   const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
     `/source?source=${source}&pipeline=${pipeline}`
@@ -93,15 +104,22 @@ ${italic`Select from the list below, the sources to remove`}
 }
 
 async function _removePipelineSourceCb(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("Callback Query data is empty");
 
-  const [, source, value, page] = ctx.callbackQuery.data.split(":") as [string, Source, Action | "page", string];
+  const [, source, value, page] = ctx.callbackQuery.data.split(":") as [
+    string,
+    Source,
+    Action | "page",
+    string
+  ];
   const pipeline = ctx.session.pipeline;
 
   if (value === "page") {
     const _data = cache.get(`removePipelineSourceCb_data`);
 
-    if (!_data) throw new Error("This keyboard is stale. Please call the command again");
+    if (!_data)
+      throw new Error("This keyboard is stale. Please call the command again");
     const data: DataSource = JSON.parse(_data);
 
     const { keyboard } = buildPaginatedKeyboard({
@@ -127,6 +145,7 @@ async function _removePipelineSourceCb(ctx: Context) {
     value,
     pipeline,
   });
+
   if (error) throw error;
   if (!msg) throw new Error("API response is malformed");
 

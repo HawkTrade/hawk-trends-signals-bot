@@ -4,11 +4,20 @@ import { errorWrapper } from "../utils/helpers";
 import { HawkApi } from "../utils/fetch";
 import { HawkApiResponse } from "../models/twitter.api";
 import { bold, fmt } from "telegraf/format";
-import { addPipelineSourceCb_, getPipelineSourceCb_, removePipelineSourceCb_ } from "./source.callback";
-import { addPipelineParserCb_, getPipelineParserCb_, removePipelineParserCb_ } from "./parser.callback";
+import {
+  addPipelineSourceCb_,
+  getPipelineSourceCb_,
+  removePipelineSourceCb_,
+} from "./source.callback";
+import {
+  addPipelineParserCb_,
+  getPipelineParserCb_,
+  removePipelineParserCb_,
+} from "./parser.callback";
 
 async function _selectedPipelineCb(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("No data in the callback query");
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("No data in the callback query");
   const pipeline = ctx.callbackQuery.data.split(":")[1];
   if (!pipeline) throw new Error("Pipeline in callback data is undefined");
 
@@ -49,10 +58,13 @@ async function _selectedPipelineCb(ctx: Context) {
 
 async function sharedSelectPipelineCb_(ctx: Context) {
   await ctx.sendChatAction("typing");
-  const { data: pipelines, error } = await HawkApi.get<HawkApiResponse<LocalPipeline[]>>("/pipeline?with_hawk=false");
+  const { data: pipelines, error } = await HawkApi.get<
+    HawkApiResponse<LocalPipeline[]>
+  >("/pipeline?with_hawk=false");
 
   if (error) throw error;
-  if (!pipelines || !pipelines.length) throw new Error("There are no Pipelines to select from");
+  if (!pipelines || !pipelines.length)
+    throw new Error("There are no Pipelines to select from");
 
   const keyboard = [];
   for (let i = 0; i < pipelines.length; i += 2) {
