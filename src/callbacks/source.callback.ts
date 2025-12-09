@@ -23,10 +23,12 @@ async function _sourceSelectedCb(ctx: Context) {
 
   if (action === "get" && !pipeline) {
     await ctx.sendChatAction("typing");
-    const { data, msg, error } = await HawkApi.get("/source/" + source);
+    const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
+      "/source/" + source
+    );
     if (error) throw error;
 
-    const message = getSourcesMessage(msg, data);
+    const message = getSourcesMessage(msg, data?.labels);
 
     await ctx.reply(message);
     return;
@@ -44,13 +46,12 @@ async function getPipelineSourceCb_(
   pipeline: string
 ) {
   await ctx.sendChatAction("typing");
-  const { data, msg, error } = await HawkApi.get(
+  const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
     `/source?source=${source}&pipeline=${pipeline}`
   );
   if (error) throw error;
 
-  const message = getSourcesMessage(msg, data);
-
+  const message = getSourcesMessage(msg, data?.labels);
   await ctx.reply(message);
 }
 

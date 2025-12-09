@@ -23,11 +23,9 @@ const start = async () => {
 
     process.once("SIGINT", () => {
       fastify.close();
-      // fastify.bot.stop("SIGINT");
     });
     process.once("SIGTERM", () => {
       fastify.close();
-      // fastify.bot.stop("SIGTERM");
     });
   } catch (err) {
     fastify.log.error(err);
