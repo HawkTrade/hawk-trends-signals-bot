@@ -15,9 +15,7 @@ async function startCmd(ctx: Context) {
 }
 
 async function helpCmd(ctx: Context) {
-  const helpText = botCommands
-    .map((c) => `/${c.command} - ${c.description}`)
-    .join("\n");
+  const helpText = botCommands.map((c) => `/${c.command} - ${c.description}`).join("\n");
 
   await ctx.reply(`Here are the available commands:\n\n${helpText}`);
 }

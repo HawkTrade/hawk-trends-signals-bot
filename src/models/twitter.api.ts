@@ -26,6 +26,12 @@ type HawkApiResponse<T = string[]> = Partial<{
   error: string;
 }>;
 
+type PingResponse = {
+  data: unknown;
+  success: boolean;
+  message: string;
+};
+
 type DataSource = {
   sources: string[];
   labels: string[];
@@ -38,4 +44,5 @@ export type {
   FilterRules,
   HawkApiResponse,
   DataSource,
+  PingResponse,
 };

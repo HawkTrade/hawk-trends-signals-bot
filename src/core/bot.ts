@@ -6,7 +6,13 @@ import type { FastifyInstance } from "fastify";
 import type { Context } from "../models/telegraf.model";
 import { helpCmd, startCmd } from "../commands/start.command";
 import botCommands from "../commands/commands";
-import { addSourceCmd, removeSourceCmd, getSourcesCmd, getSourcesForPipelineCmd } from "../commands/source.command";
+import {
+  addSourceCmd,
+  removeSourceCmd,
+  getSourcesCmd,
+  getSourcesForPipelineCmd,
+  pingCmd,
+} from "../commands/source.command";
 import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
 import {
   createPipelineCmd,
@@ -50,8 +56,9 @@ async function init(fastify: FastifyInstance) {
         bot.command("remove_source", removeSourceCmd);
         bot.command("get_sources", getSourcesCmd);
         bot.command("get_pipeline_sources", getSourcesForPipelineCmd);
+        bot.command("ping", pingCmd);
 
-        bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get|get_pip)$/, sourceSelectedCb);
+        bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get|get_pip|ping)$/, sourceSelectedCb);
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
 
