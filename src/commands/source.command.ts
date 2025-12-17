@@ -1,4 +1,6 @@
+import { pollMessage } from "../messages/sources_parsers.messages";
 import type { Action as Act, Context } from "../models/telegraf.model";
+import { HawkApi } from "../utils/fetch";
 import { errorWrapper, validateCallerIsAdmin } from "../utils/helpers";
 
 type Action = Act | `get_pip` | "ping";
@@ -38,4 +40,12 @@ const getSourcesCmd = makeSourceCmd("get");
 const getSourcesForPipelineCmd = makeSourceCmd("get_pip");
 const pingCmd = makeSourceCmd("ping");
 
-export { addSourceCmd, removeSourceCmd, getSourcesCmd, getSourcesForPipelineCmd, pingCmd };
+const pollCmd = errorWrapper(async (ctx: Context) => {
+  const { error, data, msg } = await HawkApi.get("poll");
+  if (error) throw error;
+
+  const message = pollMessage(msg!, data!);
+  await ctx.reply(message);
+});
+
+export { addSourceCmd, removeSourceCmd, getSourcesCmd, getSourcesForPipelineCmd, pingCmd, pollCmd };

@@ -12,6 +12,7 @@ import {
   getSourcesCmd,
   getSourcesForPipelineCmd,
   pingCmd,
+  pollCmd,
 } from "../commands/source.command";
 import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
 import {
@@ -57,6 +58,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("get_sources", getSourcesCmd);
         bot.command("get_pipeline_sources", getSourcesForPipelineCmd);
         bot.command("ping", pingCmd);
+        bot.command("poll", pollCmd);
 
         bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get|get_pip|ping)$/, sourceSelectedCb);
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);

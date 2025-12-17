@@ -3,6 +3,7 @@ import { BotCommand } from "telegraf/typings/core/types/typegram";
 const botCommands: BotCommand[] = [
   { command: "start", description: "Start the bot and get a welcome message" },
   { command: "ping", description: "Check status of the Listeners" },
+  { command: "poll", description: "Check for pending updates in sources and update them" },
   { command: "add_source", description: "Add a new source to monitor" },
   { command: "remove_source", description: "Remove a source" },
   {

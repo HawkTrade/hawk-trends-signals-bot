@@ -1,4 +1,4 @@
-import { bold, code, fmt, join } from "telegraf/format";
+import { bold, code, fmt, join, italic } from "telegraf/format";
 import { PingResponse } from "../models/twitter.api";
 
 function getSourcesMessage(msg: string | undefined, sources: string[] | undefined) {
@@ -63,4 +63,18 @@ function pingMessage(payload: PingResponse) {
   return fmt`${join(content, "\n")}`;
 }
 
-export { getSourcesMessage, getParserMessage, pingMessage };
+function pollMessage(msg: string, data: string[]) {
+  if (data.length === 0) {
+    return fmt`${bold(msg)}
+
+${italic("There are no data polled at the moment")}`;
+  } else {
+    const sources_msg = data.map((src) => fmt`• ${bold(src)}`);
+    return fmt`${bold(msg)}
+  
+${join(sources_msg, "\n")}
+`;
+  }
+}
+
+export { getSourcesMessage, getParserMessage, pingMessage, pollMessage };
