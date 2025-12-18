@@ -41,7 +41,7 @@ const getSourcesForPipelineCmd = makeSourceCmd("get_pip");
 const pingCmd = makeSourceCmd("ping");
 
 const pollCmd = errorWrapper(async (ctx: Context) => {
-  const { error, data, msg } = await HawkApi.get("poll");
+  const { error, data, msg } = await HawkApi.get("/poll");
   if (error) throw error;
 
   const message = pollMessage(msg!, data!);
