@@ -34,4 +34,14 @@ type ExternalPipeline = {
 
 type Pipeline = LocalPipeline & Omit<ExternalPipeline, "id">;
 
-export type { Pipeline, LocalPipeline };
+interface WebData {
+  title: string;
+  url: string;
+  content: string;
+}
+
+interface WebScraperParams extends WebData {
+  container: string;
+}
+
+export type { Pipeline, LocalPipeline, WebData, WebScraperParams };

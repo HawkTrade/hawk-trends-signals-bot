@@ -30,6 +30,7 @@ const botCommands: BotCommand[] = [
     command: "cancel_pipeline_creation",
     description: "removes from cache,pipeline being created",
   },
+  { command: "add_web_selectors", description: "Add web selectors for a blog source" },
   { command: "help", description: "Show this help message" },
 ];
 

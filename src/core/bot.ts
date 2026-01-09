@@ -14,7 +14,11 @@ import {
   pingCmd,
   pollCmd,
 } from "../commands/source.command";
-import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
+import {
+  getAdminsCmd,
+  removeAdminCmd,
+  addAdminCmd,
+} from "../commands/admin.command";
 import {
   createPipelineCmd,
   cancelPipelineCmd,
@@ -23,14 +27,38 @@ import {
   editPipelineCmd,
 } from "../commands/pipeline.command";
 import type { Update } from "telegraf/typings/core/types/typegram";
-import { createPipelineMsg, editPipelineMsg } from "../handlers/pipeline.handler";
-import { createPipelineCb, getPipelineCb, removePipelineCb, editPipelineCb } from "../callbacks/pipeline.callback";
+import {
+  createPipelineMsg,
+  editPipelineMsg,
+} from "../handlers/pipeline.handler";
+import {
+  createPipelineCb,
+  getPipelineCb,
+  removePipelineCb,
+  editPipelineCb,
+} from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/admin.callback";
-import { removePipelineSourceCb, sourceSelectedCb } from "../callbacks/source.callback";
+import {
+  removePipelineSourceCb,
+  sourceSelectedCb,
+} from "../callbacks/source.callback";
 import { addParserMsg, addSourceMsg } from "../handlers/general.handler";
 import { selectedPipelineCb } from "../callbacks/shared_pipeline.callback";
-import { addRegexCmd, getPromptCmd, getRegexesCmd, removeRegexCmd, setPromptCmd } from "../commands/parser.command";
+import {
+  addRegexCmd,
+  getPromptCmd,
+  getRegexesCmd,
+  removeRegexCmd,
+  setPromptCmd,
+} from "../commands/parser.command";
 import { removePipelineRegexCb } from "../callbacks/parser.callback";
+import { addWebSelectorCmd } from "../commands/web.command";
+import {
+  webConfirmCb,
+  webPipelineCb,
+  webSourceSelectedCb,
+} from "../callbacks/web.callback";
+import { addWebSelectorMsg } from "../handlers/web.handler";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN, WEBHOOK_URL } = fastify.config;
@@ -60,7 +88,10 @@ async function init(fastify: FastifyInstance) {
         bot.command("ping", pingCmd);
         bot.command("poll", pollCmd);
 
-        bot.action(/^(telegram|x|rss|tg_bot|discord):(add|rem|get|get_pip|ping)$/, sourceSelectedCb);
+        bot.action(
+          /^(telegram|x|rss|tg_bot|discord|web):(add|rem|get|get_pip|ping)$/,
+          sourceSelectedCb
+        );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
 
@@ -91,6 +122,13 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(edit_pipeline):(.+)$/, editPipelineCb);
         bot.action(/^(selected_pipeline):(.+)$/, selectedPipelineCb); // Shared across parsers and sources
 
+        /* Web Selector Section */
+        bot.command("add_web_selectors", addWebSelectorCmd);
+
+        bot.action(/^(web_pipeline):(.+)$/, webPipelineCb);
+        bot.action(/^(web_src):(.+)$/, webSourceSelectedCb);
+        bot.action(/^(web_confirm):(yes|no)$/, webConfirmCb);
+
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;
           switch (state) {
@@ -105,6 +143,9 @@ async function init(fastify: FastifyInstance) {
               break;
             case "pipeline_edit":
               await editPipelineMsg(ctx, next);
+              break;
+            case "web_selector":
+              await addWebSelectorMsg(ctx, next);
               break;
 
             default:

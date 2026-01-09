@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { Context as TelegrafContext } from "telegraf";
 
 type Action = "add" | "rem" | "get";
-type Source = "telegram" | "x" | "rss" | "tg_bot" | "discord";
+type Source = "telegram" | "x" | "rss" | "tg_bot" | "discord" | "web";
 type Parser = "regex" | "llm";
 
 type CB_Action = "confirm" | "cancel";
@@ -14,7 +14,8 @@ interface Session {
     | "parser_action"
     | "pipeline_create"
     | "pipeline_edit"
-    | "admin_add";
+    | "admin_add"
+    | "web_selector";
   source_action: `${Source}:${Action}` | null;
   parser_action: `${Parser}:${Action}` | null;
   pipeline: string | null;
