@@ -3,14 +3,20 @@ import { BotCommand } from "telegraf/typings/core/types/typegram";
 const botCommands: BotCommand[] = [
   { command: "start", description: "Start the bot and get a welcome message" },
   { command: "ping", description: "Check status of the Listeners" },
-  { command: "poll", description: "Check for pending updates in sources and update them" },
+  {
+    command: "poll",
+    description: "Check for pending updates in sources and update them",
+  },
   { command: "add_source", description: "Add a new source to monitor" },
   { command: "remove_source", description: "Remove a source" },
   {
     command: "get_sources",
     description: "List all the data sources for a given source",
   },
-  { command: "get_pipeline_sources", description: "Get all data sources peculiar to a pipeline" },
+  {
+    command: "get_pipeline_sources",
+    description: "Get all data sources peculiar to a pipeline",
+  },
   { command: "add_regex", description: "Add a new regex pattern for parsing" },
   { command: "remove_regex", description: "Remove an existing regex pattern" },
   { command: "get_regexes", description: "List all regex patterns" },
@@ -30,7 +36,14 @@ const botCommands: BotCommand[] = [
     command: "cancel_pipeline_creation",
     description: "removes from cache,pipeline being created",
   },
-  { command: "add_web_selectors", description: "Add web selectors for a blog source" },
+  {
+    command: "add_web_selectors",
+    description: "Add web selectors for a blog source",
+  },
+  {
+    command: "test_web_source",
+    description: "Test selectors for a web source before adding",
+  },
   { command: "help", description: "Show this help message" },
 ];
 

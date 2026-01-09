@@ -4,7 +4,7 @@ import { HawkApi } from "../utils/fetch";
 import type { DataSource, HawkApiResponse } from "../models/twitter.api";
 import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
 import cache from "../db/cache";
-import { containerMsg } from "../messages/web.messages";
+import { containerMsg, testResultMsg } from "../messages/web.messages";
 
 async function _webPipelineCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
@@ -112,8 +112,52 @@ async function _webConfirmCb(ctx: Context) {
   ctx.session.state = "idle";
 }
 
+async function _webTestConfirmCb(ctx: Context) {
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("No data in the callback");
+
+  const [, action] = ctx.callbackQuery.data.split(":");
+  const cacheKey = `web_selector_context:${ctx.from?.id}`;
+  const cached = cache.get(cacheKey);
+
+  if (!cached) throw new Error("Session expired. Please start over.");
+
+  await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+
+  if (action === "no") {
+    cache.delete(cacheKey);
+    ctx.session.state = "idle";
+    await ctx.answerCbQuery("Cancelled");
+    await ctx.reply("Web source testing cancelled.");
+    return;
+  }
+
+  const { url, selectors } = JSON.parse(cached);
+  await ctx.sendChatAction("typing");
+
+  const { error, msg, data } = await HawkApi.post("/source/web/test", {
+    url,
+    selectors,
+  });
+
+  if (error) throw error;
+
+  await ctx.answerCbQuery(msg || "Test completed!");
+
+  if (data && Array.isArray(data)) {
+    const message = testResultMsg(msg || "Test Results:", data);
+    await ctx.reply(message);
+  } else {
+    await ctx.reply(msg || "Test completed but no data was returned.");
+  }
+
+  cache.delete(cacheKey);
+  ctx.session.state = "idle";
+}
+
 const webPipelineCb = errorWrapper(_webPipelineCb);
 const webSourceSelectedCb = errorWrapper(_webSourceSelectedCb);
 const webConfirmCb = errorWrapper(_webConfirmCb);
+const webTestConfirmCb = errorWrapper(_webTestConfirmCb);
 
-export { webPipelineCb, webSourceSelectedCb, webConfirmCb };
+export { webPipelineCb, webSourceSelectedCb, webConfirmCb, webTestConfirmCb };

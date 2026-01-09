@@ -1,5 +1,5 @@
-import { bold, fmt, italic, code, underline } from "telegraf/format";
-import type { WebScraperParams } from "../models/db.model";
+import { bold, fmt, italic, code, underline, join } from "telegraf/format";
+import type { WebData, WebScraperParams } from "../models/db.model";
 
 const containerMsg = fmt`
 ${bold("Step 1: Container Selector")}
@@ -8,6 +8,8 @@ Please enter the ${underline("container selector")}.
 This should be a CSS selector (class, attribute, etc.) that reflects an item wrapper for every blog/article on the page.
 
 ${italic("Example: .article-card, div[data-testid='post-container']")}
+
+${bold`💡 Tip: Use /test_web_source to verify your selectors before adding them!`}
 `;
 
 const titleMsg = fmt`
@@ -59,4 +61,30 @@ Please confirm the selectors above are correct.
 `;
 };
 
-export { containerMsg, titleMsg, urlMsg, contentMsg, webSelectorSummary };
+const testResultMsg = (msg: string, data: WebData[]) => {
+  const items = data.slice(0, 3).map(
+    (item, i) => fmt`
+${bold(`Result ${i + 1}:`)}
+${bold("Title:")} ${item.title}
+${bold("URL:")} ${item.url}
+${bold("Content Preview:")} ${item.content.slice(0, 100)}...
+`
+  );
+
+  return fmt`
+${bold(msg)}
+
+${join(items, "\n")}
+
+${data.length > 3 ? italic(`...and ${data.length - 3} more results.`) : ""}
+`;
+};
+
+export {
+  containerMsg,
+  titleMsg,
+  urlMsg,
+  contentMsg,
+  webSelectorSummary,
+  testResultMsg,
+};

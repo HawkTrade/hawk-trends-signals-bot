@@ -23,4 +23,14 @@ async function _addWebSelectorCmd(ctx: Context) {
 
 const addWebSelectorCmd = errorWrapper(_addWebSelectorCmd);
 
-export { addWebSelectorCmd };
+async function _testWebSourceCmd(ctx: Context) {
+  ctx.session.state = "web_test";
+  const { message_id } = await ctx.reply(
+    "Please enter the URL of the web source you want to test."
+  );
+  ctx.session.toDelete.push(message_id);
+}
+
+const testWebSourceCmd = errorWrapper(_testWebSourceCmd);
+
+export { addWebSelectorCmd, testWebSourceCmd };

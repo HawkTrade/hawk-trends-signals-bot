@@ -15,7 +15,8 @@ interface Session {
     | "pipeline_create"
     | "pipeline_edit"
     | "admin_add"
-    | "web_selector";
+    | "web_selector"
+    | "web_test";
   source_action: `${Source}:${Action}` | null;
   parser_action: `${Parser}:${Action}` | null;
   pipeline: string | null;

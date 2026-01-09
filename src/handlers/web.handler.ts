@@ -3,6 +3,7 @@ import { WebScraperParams } from "../models/db.model";
 import { errorWrapper } from "../utils/helpers";
 import cache from "../db/cache";
 import {
+  containerMsg,
   titleMsg,
   urlMsg,
   contentMsg,
@@ -28,7 +29,17 @@ async function _addWebSelectorMsg(ctx: Context) {
 
   const text = ctx.message.text.trim();
   const cacheKey = `web_selector_context:${ctx.from?.id}`;
-  const cached = cache.get(cacheKey);
+  const isTest = ctx.session.state === "web_test";
+
+  let cached = cache.get(cacheKey);
+
+  // For web_test, the first message is the URL
+  if (isTest && !cached) {
+    cache.set(cacheKey, JSON.stringify({ url: text, selectors: {} }));
+    const { message_id } = await ctx.reply(containerMsg);
+    ctx.session.toDelete.push(ctx.message.message_id, message_id);
+    return;
+  }
 
   if (!cached) throw new Error("Selection session expired. Please start over.");
 
@@ -62,8 +73,18 @@ async function _addWebSelectorMsg(ctx: Context) {
           reply_markup: {
             inline_keyboard: [
               [
-                { text: "✅ Confirm", callback_data: "web_confirm:yes" },
-                { text: "❌ Cancel", callback_data: "web_confirm:no" },
+                {
+                  text: "✅ Confirm",
+                  callback_data: isTest
+                    ? "web_confirm_test:yes"
+                    : "web_confirm:yes",
+                },
+                {
+                  text: "❌ Cancel",
+                  callback_data: isTest
+                    ? "web_confirm_test:no"
+                    : "web_confirm:no",
+                },
               ],
             ],
           },

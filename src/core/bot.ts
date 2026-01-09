@@ -52,11 +52,12 @@ import {
   setPromptCmd,
 } from "../commands/parser.command";
 import { removePipelineRegexCb } from "../callbacks/parser.callback";
-import { addWebSelectorCmd } from "../commands/web.command";
+import { addWebSelectorCmd, testWebSourceCmd } from "../commands/web.command";
 import {
   webConfirmCb,
   webPipelineCb,
   webSourceSelectedCb,
+  webTestConfirmCb,
 } from "../callbacks/web.callback";
 import { addWebSelectorMsg } from "../handlers/web.handler";
 
@@ -124,10 +125,12 @@ async function init(fastify: FastifyInstance) {
 
         /* Web Selector Section */
         bot.command("add_web_selectors", addWebSelectorCmd);
+        bot.command("test_web_source", testWebSourceCmd);
 
         bot.action(/^(web_pipeline):(.+)$/, webPipelineCb);
         bot.action(/^(web_src):(.+)$/, webSourceSelectedCb);
         bot.action(/^(web_confirm):(yes|no)$/, webConfirmCb);
+        bot.action(/^(web_confirm_test):(yes|no)$/, webTestConfirmCb);
 
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;
@@ -145,6 +148,7 @@ async function init(fastify: FastifyInstance) {
               await editPipelineMsg(ctx, next);
               break;
             case "web_selector":
+            case "web_test":
               await addWebSelectorMsg(ctx, next);
               break;
 
