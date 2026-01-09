@@ -15,6 +15,7 @@ const keyboards = (action: Action) => {
     [
       { text: "TG Bot", callback_data: `tg_bot:${action}` },
       { text: "Discord", callback_data: `discord:${action}` },
+      { text: "Web", callback_data: `web:${action}` },
     ],
   ];
 };
