@@ -5,6 +5,7 @@ import type { DataSource, HawkApiResponse } from "../models/twitter.api";
 import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
 import cache from "../db/cache";
 import { containerMsg, testResultMsg } from "../messages/web.messages";
+import { WebData } from "../models/db.model";
 
 async function _webPipelineCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
@@ -135,10 +136,13 @@ async function _webTestConfirmCb(ctx: Context) {
   const { url, selectors } = JSON.parse(cached);
   await ctx.sendChatAction("typing");
 
-  const { error, msg, data } = await HawkApi.post("/source/web/test", {
-    url,
-    selectors,
-  });
+  const { error, msg, data } = await HawkApi.post<HawkApiResponse<WebData[]>>(
+    "/source/web/test",
+    {
+      url,
+      selectors,
+    }
+  );
 
   if (error) throw error;
 
