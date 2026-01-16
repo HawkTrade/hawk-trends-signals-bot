@@ -1,16 +1,24 @@
 import type { Action, Context, Source } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
 import { errorWrapper } from "../utils/helpers";
-import { getSourcesMessage, pingMessage } from "../messages/sources_parsers.messages";
+import {
+  getSourcesMessage,
+  pingMessage,
+} from "../messages/sources_parsers.messages";
 import { sharedSelectPipelineCb_ } from "./shared_pipeline.callback";
 import { bold, fmt, italic } from "telegraf/format";
 import { getDefaultSession } from "../utils";
 import cache from "../db/cache";
 import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
-import type { DataSource, HawkApiResponse, PingResponse } from "../models/twitter.api";
+import type {
+  DataSource,
+  HawkApiResponse,
+  PingResponse,
+} from "../models/twitter.api";
 
 async function _sourceSelectedCb(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("Callback Query data is empty");
 
   const [source, action, pipeline] = ctx.callbackQuery.data.split(":") as [
     Source,
@@ -30,7 +38,9 @@ async function _sourceSelectedCb(ctx: Context) {
   }
 
   if (action === "get" && !pipeline) {
-    const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>("/source/" + source);
+    const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
+      "/source/" + source
+    );
     if (error) throw error;
 
     const message = getSourcesMessage(msg, data?.labels);
@@ -45,7 +55,11 @@ async function _sourceSelectedCb(ctx: Context) {
   await sharedSelectPipelineCb_(ctx);
 }
 
-async function getPipelineSourceCb_(ctx: Context, source: Source, pipeline: string) {
+async function getPipelineSourceCb_(
+  ctx: Context,
+  source: Source,
+  pipeline: string
+) {
   await ctx.sendChatAction("typing");
   const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
     `/source?source=${source}&pipeline=${pipeline}`
@@ -62,6 +76,10 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
       `Please enter the ${
         source === "rss"
           ? "feed URL"
+          : source === "web"
+          ? "blog URL"
+          : source === "binance"
+          ? "Name for the Binance account, no spaces (e.g ProTrader)"
           : source === "x"
           ? "X username"
           : source === "telegram"
@@ -77,7 +95,11 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
   ctx.session.toDelete.push(message_id);
 }
 
-async function removePipelineSourceCb_(ctx: Context, source: Source, pipeline: string) {
+async function removePipelineSourceCb_(
+  ctx: Context,
+  source: Source,
+  pipeline: string
+) {
   await ctx.sendChatAction("typing");
   const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
     `/source?source=${source}&pipeline=${pipeline}`
@@ -102,15 +124,22 @@ ${italic`Select from the list below, the sources to remove`}
 }
 
 async function _removePipelineSourceCb(ctx: Context) {
-  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
+    throw new Error("Callback Query data is empty");
 
-  const [, source, value, page] = ctx.callbackQuery.data.split(":") as [string, Source, Action | "page", string];
+  const [, source, value, page] = ctx.callbackQuery.data.split(":") as [
+    string,
+    Source,
+    Action | "page",
+    string
+  ];
   const pipeline = ctx.session.pipeline;
 
   if (value === "page") {
     const _data = cache.get(`removePipelineSourceCb_data`);
 
-    if (!_data) throw new Error("This keyboard is stale. Please call the command again");
+    if (!_data)
+      throw new Error("This keyboard is stale. Please call the command again");
     const data: DataSource = JSON.parse(_data);
 
     const { keyboard } = buildPaginatedKeyboard({

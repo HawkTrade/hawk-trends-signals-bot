@@ -60,6 +60,7 @@ import {
   webTestConfirmCb,
 } from "../callbacks/web.callback";
 import { addWebSelectorMsg } from "../handlers/web.handler";
+import { addBinanceAccountMsg } from "../handlers/binance.handler";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN, WEBHOOK_URL } = fastify.config;
@@ -90,7 +91,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("poll", pollCmd);
 
         bot.action(
-          /^(telegram|x|rss|tg_bot|discord|web):(add|rem|get|get_pip|ping)$/,
+          /^(telegram|x|rss|tg_bot|discord|web|binance):(add|rem|get|get_pip|ping)$/,
           sourceSelectedCb
         );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
@@ -150,6 +151,9 @@ async function init(fastify: FastifyInstance) {
             case "web_selector":
             case "web_test":
               await addWebSelectorMsg(ctx, next);
+              break;
+            case "binance_account":
+              await addBinanceAccountMsg(ctx, next);
               break;
 
             default:

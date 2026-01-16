@@ -44,4 +44,16 @@ interface WebScraperParams extends WebData {
   container: string;
 }
 
-export type { Pipeline, LocalPipeline, WebData, WebScraperParams };
+interface BinanceAccount {
+  apiKey: string;
+  apiSecret: string;
+  name: string;
+}
+
+export type {
+  Pipeline,
+  LocalPipeline,
+  WebData,
+  WebScraperParams,
+  BinanceAccount,
+};

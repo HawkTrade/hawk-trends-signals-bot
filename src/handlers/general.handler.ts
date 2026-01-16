@@ -4,6 +4,7 @@ import type { Context, Parser, Source } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
 import { errorWrapper } from "../utils/helpers";
 import { getDefaultSession, to_delete } from "../utils";
+import { keyMsg } from "../messages/binance.messages";
 
 async function _addAdminMsg(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message))
@@ -43,8 +44,18 @@ async function _addSourceMsg(ctx: Context) {
   if (error) throw error;
   if (!msg) throw new Error("API response is malformed!");
 
-  await ctx.reply(msg);
-  ctx.session = getDefaultSession();
+  if (source === "binance") {
+    const cacheKey = `binance_account:${ctx.from?.id}`;
+    cache.set(cacheKey, JSON.stringify({ name: text }));
+
+    const { message_id } = await ctx.reply(keyMsg);
+    ctx.session.state = "binance_account";
+    ctx.session.toDelete.push(message_id);
+  } else {
+    await ctx.reply(msg);
+    await to_delete(ctx);
+    ctx.session = getDefaultSession();
+  }
 }
 
 async function _addParserMsg(ctx: Context) {
@@ -64,6 +75,7 @@ async function _addParserMsg(ctx: Context) {
   if (!msg) throw new Error("API response is malformed!");
 
   await ctx.reply(msg);
+  await to_delete(ctx);
   ctx.session = getDefaultSession();
 }
 
