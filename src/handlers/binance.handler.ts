@@ -21,6 +21,7 @@ async function _addBinanceAccountMsg(ctx: Context) {
 
   const account: Partial<BinanceAccount> = JSON.parse(cached);
   if (!account.name) throw new Error("Binance Account Name is missing");
+  ctx.session.toDelete.push(ctx.message.message_id);
 
   if (!account.apiKey) {
     account.apiKey = text;

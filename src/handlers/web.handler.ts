@@ -28,6 +28,8 @@ async function _addWebSelectorMsg(ctx: Context) {
     throw new Error("No message was provided");
 
   const text = ctx.message.text.trim();
+  ctx.session.toDelete.push(ctx.message.message_id);
+
   const cacheKey = `web_selector_context:${ctx.from?.id}`;
   const isTest = ctx.session.state === "web_test";
 
