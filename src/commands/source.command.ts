@@ -24,11 +24,12 @@ const keyboards = (action: Action) => {
 async function _sourceCmd(ctx: Context, action: Action) {
   await validateCallerIsAdmin(ctx);
 
-  await ctx.reply(cmd, {
+  const { message_id } = await ctx.reply(cmd, {
     reply_markup: {
       inline_keyboard: keyboards(action),
     },
   });
+  ctx.session.toDelete.push(message_id);
 }
 
 const makeSourceCmd = (action: Action) =>

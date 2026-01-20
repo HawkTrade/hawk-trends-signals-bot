@@ -72,14 +72,18 @@ async function sharedSelectPipelineCb_(ctx: Context) {
       pipelines.slice(i, i + 2).map((p) => ({
         text: p.name,
         callback_data: `selected_pipeline:${p.pipeline}`,
-      }))
+      })),
     );
   }
-  await ctx.reply(fmt`${bold("Select a pipeline to complete this action")}`, {
-    reply_markup: {
-      inline_keyboard: keyboard,
+  const { message_id } = await ctx.reply(
+    fmt`${bold("Select a pipeline to complete this action")}`,
+    {
+      reply_markup: {
+        inline_keyboard: keyboard,
+      },
     },
-  });
+  );
+  ctx.session.toDelete.push(message_id);
 }
 
 const selectedPipelineCb = errorWrapper(_selectedPipelineCb);

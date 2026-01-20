@@ -7,7 +7,7 @@ import {
 } from "../messages/sources_parsers.messages";
 import { sharedSelectPipelineCb_ } from "./shared_pipeline.callback";
 import { bold, fmt, italic } from "telegraf/format";
-import { getDefaultSession } from "../utils";
+import { getDefaultSession, to_delete } from "../utils";
 import cache from "../db/cache";
 import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
 import type {
@@ -23,7 +23,7 @@ async function _sourceSelectedCb(ctx: Context) {
   const [source, action, pipeline] = ctx.callbackQuery.data.split(":") as [
     Source,
     Action | "get_pip" | "ping",
-    string | undefined
+    string | undefined,
   ];
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
@@ -33,18 +33,20 @@ async function _sourceSelectedCb(ctx: Context) {
     const response = await HawkApi.get<PingResponse>("/ping/" + source);
 
     const message = pingMessage(response);
+    await to_delete(ctx);
     await ctx.reply(message);
     return;
   }
 
   if (action === "get" && !pipeline) {
     const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
-      "/source/" + source
+      "/source/" + source,
     );
     if (error) throw error;
 
     const message = getSourcesMessage(msg, data?.labels);
 
+    await to_delete(ctx);
     await ctx.reply(message);
     return;
   }
@@ -58,15 +60,16 @@ async function _sourceSelectedCb(ctx: Context) {
 async function getPipelineSourceCb_(
   ctx: Context,
   source: Source,
-  pipeline: string
+  pipeline: string,
 ) {
   await ctx.sendChatAction("typing");
   const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
-    `/source?source=${source}&pipeline=${pipeline}`
+    `/source?source=${source}&pipeline=${pipeline}`,
   );
   if (error) throw error;
 
   const message = getSourcesMessage(msg, data?.labels);
+  await to_delete(ctx);
   await ctx.reply(message);
 }
 
@@ -77,19 +80,19 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
         source === "rss"
           ? "feed URL"
           : source === "web"
-          ? "blog URL"
-          : source === "binance"
-          ? "Name for the Binance account, no spaces (e.g ProTrader)"
-          : source === "x"
-          ? "X username"
-          : source === "telegram"
-          ? "Channel username"
-          : "Channel ID"
-      }`
+            ? "blog URL"
+            : source === "binance"
+              ? "Name for the Binance account, no spaces (e.g ProTrader)"
+              : source === "x"
+                ? "X username"
+                : source === "telegram"
+                  ? "Channel username"
+                  : "Channel ID"
+      }`,
     )}`,
     {
       reply_markup: { force_reply: true },
-    }
+    },
   );
   ctx.session.state = "source_action";
   ctx.session.toDelete.push(message_id);
@@ -98,11 +101,11 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
 async function removePipelineSourceCb_(
   ctx: Context,
   source: Source,
-  pipeline: string
+  pipeline: string,
 ) {
   await ctx.sendChatAction("typing");
   const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>(
-    `/source?source=${source}&pipeline=${pipeline}`
+    `/source?source=${source}&pipeline=${pipeline}`,
   );
   if (error) throw error;
   if (!msg || !data) throw new Error("API response is malformed!");
@@ -131,7 +134,7 @@ async function _removePipelineSourceCb(ctx: Context) {
     string,
     Source,
     Action | "page",
-    string
+    string,
   ];
   const pipeline = ctx.session.pipeline;
 
@@ -158,6 +161,7 @@ async function _removePipelineSourceCb(ctx: Context) {
 
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
+  await to_delete(ctx);
   await ctx.sendChatAction("typing");
 
   const { msg, error } = await HawkApi.delete("/source", {

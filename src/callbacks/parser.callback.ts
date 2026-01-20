@@ -3,12 +3,12 @@ import { getParserMessage } from "../messages/sources_parsers.messages";
 import type { Context, Parser } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
 import { errorWrapper } from "../utils/helpers";
-import { getDefaultSession } from "../utils";
+import { getDefaultSession, to_delete } from "../utils";
 
 async function getPipelineParserCb_(
   ctx: Context,
   parser: Parser,
-  pipeline: string
+  pipeline: string,
 ) {
   const path = parser === "llm" ? "prompt" : "regex";
   await ctx.sendChatAction("typing");
@@ -17,6 +17,7 @@ async function getPipelineParserCb_(
   if (error) throw error;
 
   const message = getParserMessage(msg, data);
+  await to_delete(ctx);
   await ctx.reply(message);
 }
 
@@ -36,13 +37,14 @@ async function addPipelineParserCb_(ctx: Context, parser: Parser) {
 async function removePipelineParserCb_(
   ctx: Context,
   parser: Parser,
-  pipeline: string
+  pipeline: string,
 ) {
   await ctx.sendChatAction("typing");
   if (parser === "llm") {
     const { error, msg } = await HawkApi.delete(`llm/${pipeline}`);
     if (error) throw new Error(error);
 
+    await to_delete(ctx);
     await ctx.reply(msg!);
     return;
   }
@@ -82,6 +84,7 @@ async function _removePipelineRegexCb(ctx: Context) {
 
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
+  await to_delete(ctx);
   await ctx.sendChatAction("typing");
 
   const { msg, error } = await HawkApi.delete("/regex", {
