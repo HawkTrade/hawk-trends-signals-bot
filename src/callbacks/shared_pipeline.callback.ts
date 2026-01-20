@@ -4,6 +4,7 @@ import { errorWrapper } from "../utils/helpers";
 import { HawkApi } from "../utils/fetch";
 import { HawkApiResponse } from "../models/twitter.api";
 import { bold, fmt } from "telegraf/format";
+import { buildPaginatedKeyboard } from "../keyboards/shared.keyboards";
 import {
   addPipelineSourceCb_,
   getPipelineSourceCb_,
@@ -18,7 +19,16 @@ import {
 async function _selectedPipelineCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
     throw new Error("No data in the callback query");
-  const pipeline = ctx.callbackQuery.data.split(":")[1];
+  const data = ctx.callbackQuery.data.split(":");
+  const pipeline = data[1]; // might be part of "selected_pipeline:<id>" or "selected_pipeline:page:<n>"
+
+  if (data[1] === "page") {
+    const page = Number(data[2]);
+    if (isNaN(page)) throw new Error("Invalid page number");
+    await sharedSelectPipelineCb_(ctx, page);
+    await ctx.answerCbQuery();
+    return;
+  }
   if (!pipeline) throw new Error("Pipeline in callback data is undefined");
 
   const { source_action, parser_action } = ctx.session;
@@ -56,7 +66,7 @@ async function _selectedPipelineCb(ctx: Context) {
   }
 }
 
-async function sharedSelectPipelineCb_(ctx: Context) {
+async function sharedSelectPipelineCb_(ctx: Context, page = 0) {
   await ctx.sendChatAction("typing");
   const { data: pipelines, error } = await HawkApi.get<
     HawkApiResponse<LocalPipeline[]>
@@ -66,24 +76,29 @@ async function sharedSelectPipelineCb_(ctx: Context) {
   if (!pipelines || !pipelines.length)
     throw new Error("There are no Pipelines to select from");
 
-  const keyboard = [];
-  for (let i = 0; i < pipelines.length; i += 2) {
-    keyboard.push(
-      pipelines.slice(i, i + 2).map((p) => ({
-        text: p.name,
-        callback_data: `selected_pipeline:${p.pipeline}`,
-      })),
-    );
-  }
-  const { message_id } = await ctx.reply(
-    fmt`${bold("Select a pipeline to complete this action")}`,
-    {
-      reply_markup: {
-        inline_keyboard: keyboard,
+  const { keyboard } = buildPaginatedKeyboard({
+    data: pipelines.map((p) => ({ ...p, value: p.pipeline })),
+    page,
+    makeCallback: (value) => `selected_pipeline:${value}`,
+    navPrefix: `selected_pipeline`,
+    label: (p) => p.name,
+  });
+
+  if (page > 0 || ctx.callbackQuery) {
+    // If navigating, edit the existing message
+    await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
+  } else {
+    // Initial call
+    const { message_id } = await ctx.reply(
+      fmt`${bold("Select a pipeline to complete this action")}`,
+      {
+        reply_markup: {
+          inline_keyboard: keyboard,
+        },
       },
-    },
-  );
-  ctx.session.toDelete.push(message_id);
+    );
+    ctx.session.toDelete.push(message_id);
+  }
 }
 
 const selectedPipelineCb = errorWrapper(_selectedPipelineCb);
