@@ -84,7 +84,12 @@ async function sharedSelectPipelineCb_(ctx: Context, page = 0) {
     label: (p) => p.name,
   });
 
-  if (page > 0 || ctx.callbackQuery) {
+  const isPagination =
+    ctx.callbackQuery &&
+    "data" in ctx.callbackQuery &&
+    ctx.callbackQuery.data.startsWith("selected_pipeline:page:");
+
+  if (isPagination) {
     // If navigating, edit the existing message
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
   } else {
