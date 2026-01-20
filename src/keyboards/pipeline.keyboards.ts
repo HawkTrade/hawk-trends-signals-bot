@@ -3,14 +3,21 @@ import type { LocalPipeline } from "../models/db.model";
 type PipelineCallback = "remove_pipeline" | "get_pipeline" | "edit_pipeline";
 function pipelinesKeyboard(
   pipelines: LocalPipeline[] | undefined,
-  callback: PipelineCallback
+  callback: PipelineCallback,
+  page: number = 1,
 ) {
   if (!pipelines || !pipelines.length) return [];
 
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(pipelines.length / PAGE_SIZE);
+  const start = (page - 1) * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const currentPipelines = pipelines.slice(start, end);
+
   const keyboard: Array<Array<{ text: string; callback_data: string }>> = [];
 
-  for (let i = 0; i < pipelines.length; i += 2) {
-    const rowPipelines = pipelines.slice(i, i + 2);
+  for (let i = 0; i < currentPipelines.length; i += 2) {
+    const rowPipelines = currentPipelines.slice(i, i + 2);
 
     const row: Array<{ text: string; callback_data: string }> =
       rowPipelines.map((pipeline) => ({
@@ -19,6 +26,23 @@ function pipelinesKeyboard(
       }));
 
     keyboard.push(row);
+  }
+
+  const navigationRow: Array<{ text: string; callback_data: string }> = [];
+  if (page > 1) {
+    navigationRow.push({
+      text: "« Previous",
+      callback_data: `list_pipelines:${callback}:${page - 1}`,
+    });
+  }
+  if (page < totalPages) {
+    navigationRow.push({
+      text: "Next »",
+      callback_data: `list_pipelines:${callback}:${page + 1}`,
+    });
+  }
+  if (navigationRow.length > 0) {
+    keyboard.push(navigationRow);
   }
 
   return keyboard;

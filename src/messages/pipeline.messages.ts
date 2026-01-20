@@ -43,22 +43,28 @@ ${bold`Stop Loss %`} ${pipeline.sl ?? "Not Set"}
 ${
   original
     ? italic(
-        "If everything looks correct, confirm to create this pipeline or cancel to start over."
+        "If everything looks correct, confirm to create this pipeline or cancel to start over.",
       )
     : ""
 }`;
 }
 
 type LocalPipelineAction = "remove" | "view" | "edit";
+const PAGE_SIZE = 10;
 function localPipelineMessage(
   pipelines: LocalPipeline[] | undefined,
-  action: LocalPipelineAction
+  action: LocalPipelineAction,
+  page: number = 1,
 ) {
   if (!pipelines || !pipelines.length)
     return `No pipelines available to ${action}`;
 
-  const pipeline_msg = pipelines.map(
-    (p, i) => fmt`${bold(`${i + 1}.`)} ${p.name}`
+  const start = (page - 1) * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const currentPipelines = pipelines.slice(start, end);
+
+  const pipeline_msg = currentPipelines.map(
+    (p, i) => fmt`${bold(`${start + i + 1}.`)} ${p.name}`,
   );
 
   return fmt`${bold("Here are the list of pipelines: ")}
@@ -70,23 +76,28 @@ ${italic("Select from the buttons below, the pipeline to " + action)}`;
 
 function fullPipelineMessage(
   msg: string | undefined,
-  pipelines: Pipeline[] | undefined
+  pipelines: Pipeline[] | undefined,
+  page: number = 1,
 ) {
   if (!pipelines || !msg) {
     return fmt`${italic(
-      "There are no pipelines in the system. Call /create_pipeline to generate one"
+      "There are no pipelines in the system. Call /create_pipeline to generate one",
     )}`;
   }
 
-  const pipeline_msg = pipelines.map(
+  const start = (page - 1) * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const currentPipelines = pipelines.slice(start, end);
+
+  const pipeline_msg = currentPipelines.map(
     (p, i) =>
       fmt`
-${bold(`${i + 1}. ${p.name}`)}
+${bold(`${start + i + 1}. ${p.name}`)}
   ${italic(p.description)}
   ${bold("Brands:")} ${p.brands[0]}
   ${bold`Take Profit:`} % ${p.takeProfit ?? "Not Set"}
   ${bold`Stop Loss:`} % ${p.stopLoss ?? "Not Set"}
-  `
+  `,
   );
 
   return fmt`${bold(msg)}

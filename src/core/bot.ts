@@ -36,6 +36,7 @@ import {
   getPipelineCb,
   removePipelineCb,
   editPipelineCb,
+  listPipelinesCb,
 } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/admin.callback";
 import {
@@ -76,7 +77,7 @@ async function init(fastify: FastifyInstance) {
           session({
             defaultSession: getDefaultSession,
             store,
-          })
+          }),
         );
 
         bot.start(startCmd);
@@ -92,7 +93,7 @@ async function init(fastify: FastifyInstance) {
 
         bot.action(
           /^(telegram|x|rss|tg_bot|discord|web|binance):(add|rem|get|get_pip|ping)$/,
-          sourceSelectedCb
+          sourceSelectedCb,
         );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
@@ -122,6 +123,10 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(remove_pipeline):(.+)$/, removePipelineCb);
         bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
         bot.action(/^(edit_pipeline):(.+)$/, editPipelineCb);
+        bot.action(
+          /^(list_pipelines):(get_pipeline|remove_pipeline|edit_pipeline):(\d+)$/,
+          listPipelinesCb,
+        );
         bot.action(/^(selected_pipeline):(.+)$/, selectedPipelineCb); // Shared across parsers and sources
 
         /* Web Selector Section */
@@ -206,12 +211,12 @@ async function init(fastify: FastifyInstance) {
       },
       {
         name: "hawk-trends-and-signals-bot",
-      }
+      },
     ),
     {
       token: BOT_TOKEN,
       store,
-    }
+    },
   );
 
   return fastify;
