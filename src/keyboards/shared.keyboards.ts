@@ -53,13 +53,13 @@ function buildPaginatedKeyboard<T>({
   const navRow = [];
   if (page > 0) {
     navRow.push({
-      text: "⬅️ Prev",
+      text: "<< Prev",
       callback_data: `${navPrefix}:page:${page - 1}`,
     });
   }
   if (page < totalPages - 1) {
     navRow.push({
-      text: "Next ➡️",
+      text: "Next >>",
       callback_data: `${navPrefix}:page:${page + 1}`,
     });
   }
