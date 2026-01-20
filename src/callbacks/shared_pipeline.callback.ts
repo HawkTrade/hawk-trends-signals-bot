@@ -82,6 +82,7 @@ async function sharedSelectPipelineCb_(ctx: Context, page = 0) {
     makeCallback: (value) => `selected_pipeline:${value}`,
     navPrefix: `selected_pipeline`,
     label: (p) => p.name,
+    value: (p) => p.pipeline,
   });
 
   const isPagination =

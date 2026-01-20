@@ -15,6 +15,7 @@ import {
 } from "../messages/pipeline.messages";
 import { pipelinesKeyboard } from "../keyboards/pipeline.keyboards";
 import { HawkApiResponse } from "../models/twitter.api";
+import { to_delete } from "../utils";
 
 async function _actionCreatePipelineCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
@@ -44,6 +45,7 @@ async function _actionCreatePipelineCb(ctx: Context) {
 
   await ctx.answerCbQuery(msg!, { show_alert: true });
   await ctx.editMessageText(createPipelineSummary(partial, false));
+  await to_delete(ctx);
 }
 
 async function _removePipelineCb(ctx: Context) {
