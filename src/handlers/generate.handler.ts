@@ -3,10 +3,6 @@ import { Context } from "../models/telegraf.model";
 import { HawkApi } from "../utils/fetch";
 import { getDefaultSession, to_delete } from "../utils";
 
-function escape(text: string) {
-  return text.replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, "\\$1");
-}
-
 async function _generateTradeInterfaceRegexHdlr(ctx: Context) {
   if (!ctx.message || !("text" in ctx.message))
     throw new Error("No context was provided");
@@ -25,10 +21,7 @@ async function _generateTradeInterfaceRegexHdlr(ctx: Context) {
 
   await ctx.reply(msg);
   await ctx.reply(
-    `Generated Regex Pattern:\n\n\`${escape(data as unknown as string)}\`\n\nYou can copy and paste it into your pipeline settings.`,
-    {
-      parse_mode: "MarkdownV2",
-    },
+    `Generated Regex Pattern:\n\n\`${data}\`\n\nYou can copy and paste it into your pipeline settings.`,
   );
   ctx.session = getDefaultSession();
   await to_delete(ctx);
