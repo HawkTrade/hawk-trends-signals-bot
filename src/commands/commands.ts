@@ -44,6 +44,11 @@ const botCommands: BotCommand[] = [
     command: "test_web_source",
     description: "Test selectors for a web source before adding",
   },
+  {
+    command: "generate_regex",
+    description:
+      "Generate a new regex pattern by passing in an example content",
+  },
   { command: "help", description: "Show this help message" },
 ];
 

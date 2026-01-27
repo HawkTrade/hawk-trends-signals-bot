@@ -20,7 +20,8 @@ type State =
   | "admin_add"
   | "web_selector"
   | "web_test"
-  | "binance_account";
+  | "binance_account"
+  | "generate_regex";
 
 type CB_Action = "confirm" | "cancel";
 

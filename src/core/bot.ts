@@ -62,6 +62,8 @@ import {
 } from "../callbacks/web.callback";
 import { addWebSelectorMsg } from "../handlers/web.handler";
 import { addBinanceAccountMsg } from "../handlers/binance.handler";
+import { generateTradeInterfaceRegexCmd } from "../commands/generate.command";
+import { generateTradeInterfaceRegexHdlr } from "../handlers/generate.handler";
 
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN, WEBHOOK_URL } = fastify.config;
@@ -138,6 +140,9 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(web_confirm):(yes|no)$/, webConfirmCb);
         bot.action(/^(web_confirm_test):(yes|no)$/, webTestConfirmCb);
 
+        /* Generate Handlers Section */
+        bot.command("generate_regex", generateTradeInterfaceRegexCmd);
+
         bot.on("message", async (ctx, next) => {
           const { state } = ctx.session;
           switch (state) {
@@ -159,6 +164,9 @@ async function init(fastify: FastifyInstance) {
               break;
             case "binance_account":
               await addBinanceAccountMsg(ctx, next);
+              break;
+            case "generate_regex":
+              await generateTradeInterfaceRegexHdlr(ctx, next);
               break;
 
             default:
