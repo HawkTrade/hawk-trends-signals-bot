@@ -26,7 +26,7 @@ class CustomFetch<H = unknown> {
   private async request<T>(
     endpoint: string,
     method: HttpMethod,
-    options: FetchOptions = {}
+    options: FetchOptions = {},
   ): Promise<T> {
     const url = this.baseUrl + endpoint;
     const headers: Record<string, string> = {

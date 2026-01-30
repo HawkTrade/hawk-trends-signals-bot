@@ -1,5 +1,5 @@
 node_modules
 dist
 .env
-session.db
+sessions.db
 .env.local

@@ -13,6 +13,7 @@ import {
   getSourcesForPipelineCmd,
   pingCmd,
   pollCmd,
+  backfillCmd,
 } from "../commands/source.command";
 import {
   getAdminsCmd,
@@ -65,6 +66,12 @@ import { addBinanceAccountMsg } from "../handlers/binance.handler";
 import { generateTradeInterfaceRegexCmd } from "../commands/generate.command";
 import { generateTradeInterfaceRegexHdlr } from "../handlers/generate.handler";
 
+import {
+  backfillSourceSelectedCb,
+  backfillTypeSelectedCb,
+} from "../callbacks/backfill.callback";
+import { backfillMsgHandler } from "../handlers/backfill.handler";
+
 async function init(fastify: FastifyInstance) {
   const { BOT_TOKEN, WEBHOOK_URL } = fastify.config;
 
@@ -92,13 +99,17 @@ async function init(fastify: FastifyInstance) {
         bot.command("get_pipeline_sources", getSourcesForPipelineCmd);
         bot.command("ping", pingCmd);
         bot.command("poll", pollCmd);
+        bot.command("backfill", backfillCmd);
 
         bot.action(
-          /^(telegram|x|rss|tg_bot|discord|web|binance):(add|rem|get|get_pip|ping)$/,
+          /^(telegram|x|rss|tg_bot|discord|web|binance):(add|rem|get|get_pip|ping|backfill)$/,
           sourceSelectedCb,
         );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
+
+        bot.action(/^(backfill_src):(.+)$/, backfillSourceSelectedCb);
+        bot.action(/^(backfill_type):(.+)$/, backfillTypeSelectedCb);
 
         /* Parser Management Section */
         bot.command("add_regex", addRegexCmd);
@@ -167,6 +178,9 @@ async function init(fastify: FastifyInstance) {
               break;
             case "generate_regex":
               await generateTradeInterfaceRegexHdlr(ctx, next);
+              break;
+            case "backfill":
+              await backfillMsgHandler(ctx, next);
               break;
 
             default:

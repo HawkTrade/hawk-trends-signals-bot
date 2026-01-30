@@ -15,6 +15,7 @@ import {
   getPipelineParserCb_,
   removePipelineParserCb_,
 } from "./parser.callback";
+import { selectBackfillSourceCb_ } from "./backfill.callback";
 
 async function _selectedPipelineCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery))
@@ -49,6 +50,9 @@ async function _selectedPipelineCb(ctx: Context) {
       case "rem":
         await removePipelineSourceCb_(ctx, source, pipeline);
         break;
+      case "backfill":
+        await selectBackfillSourceCb_(ctx, source, pipeline);
+        break;
     }
   } else if (parser_action) {
     const [parser, action] = parser_action.split(":") as [Parser, Action];
@@ -65,7 +69,7 @@ async function _selectedPipelineCb(ctx: Context) {
     }
   }
 }
-
+// Here
 async function sharedSelectPipelineCb_(ctx: Context, page = 0) {
   await ctx.sendChatAction("typing");
   const { data: pipelines, error } = await HawkApi.get<

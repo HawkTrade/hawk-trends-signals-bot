@@ -50,10 +50,22 @@ interface BinanceAccount {
   name: string;
 }
 
+interface BackfillJob {
+  type: "date" | "count";
+  start?: Date;
+  end?: Date;
+  count?: number;
+  source: string;
+  pipeline: string;
+  requestedBy: number;
+  sourceType: string;
+}
+
 export type {
   Pipeline,
   LocalPipeline,
   WebData,
   WebScraperParams,
   BinanceAccount,
+  BackfillJob,
 };

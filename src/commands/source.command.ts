@@ -42,6 +42,7 @@ const removeSourceCmd = makeSourceCmd("rem");
 const getSourcesCmd = makeSourceCmd("get");
 const getSourcesForPipelineCmd = makeSourceCmd("get_pip");
 const pingCmd = makeSourceCmd("ping");
+const backfillCmd = makeSourceCmd("backfill");
 
 const pollCmd = errorWrapper(async (ctx: Context) => {
   const { error, data, msg } = await HawkApi.get("/poll");
@@ -57,5 +58,6 @@ export {
   getSourcesCmd,
   getSourcesForPipelineCmd,
   pingCmd,
+  backfillCmd,
   pollCmd,
 };

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { Context as TelegrafContext } from "telegraf";
 
-type Action = "add" | "rem" | "get";
+type Action = "add" | "rem" | "get" | "backfill";
 type Source =
   | "telegram"
   | "x"
@@ -21,7 +21,8 @@ type State =
   | "web_selector"
   | "web_test"
   | "binance_account"
-  | "generate_regex";
+  | "generate_regex"
+  | "backfill";
 
 type CB_Action = "confirm" | "cancel";
 
