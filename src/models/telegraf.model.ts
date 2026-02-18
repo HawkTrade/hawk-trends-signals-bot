@@ -2,14 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { Context as TelegrafContext } from "telegraf";
 
 type Action = "add" | "rem" | "get" | "backfill";
-type Source =
-  | "telegram"
-  | "x"
-  | "rss"
-  | "tg_bot"
-  | "discord"
-  | "web"
-  | "binance";
+type Source = "telegram" | "x" | "rss" | "tg_bot" | "discord" | "web" | "binance" | "new_x";
 type Parser = "regex" | "llm";
 type State =
   | "idle"

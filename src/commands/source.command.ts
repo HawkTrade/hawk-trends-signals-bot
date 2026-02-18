@@ -18,6 +18,7 @@ const keyboards = (action: Action) => {
       { text: "Web", callback_data: `web:${action}` },
     ],
     [{ text: "Binance", callback_data: `binance:${action}` }],
+    [{ text: "New X", callback_data: `new_x:${action}` }],
   ];
 };
 
@@ -52,12 +53,4 @@ const pollCmd = errorWrapper(async (ctx: Context) => {
   await ctx.reply(message);
 });
 
-export {
-  addSourceCmd,
-  removeSourceCmd,
-  getSourcesCmd,
-  getSourcesForPipelineCmd,
-  pingCmd,
-  backfillCmd,
-  pollCmd,
-};
+export { addSourceCmd, removeSourceCmd, getSourcesCmd, getSourcesForPipelineCmd, pingCmd, backfillCmd, pollCmd };
