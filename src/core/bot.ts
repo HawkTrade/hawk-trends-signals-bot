@@ -15,11 +15,7 @@ import {
   pollCmd,
   backfillCmd,
 } from "../commands/source.command";
-import {
-  getAdminsCmd,
-  removeAdminCmd,
-  addAdminCmd,
-} from "../commands/admin.command";
+import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
 import {
   createPipelineCmd,
   cancelPipelineCmd,
@@ -28,10 +24,7 @@ import {
   editPipelineCmd,
 } from "../commands/pipeline.command";
 import type { Update } from "telegraf/typings/core/types/typegram";
-import {
-  createPipelineMsg,
-  editPipelineMsg,
-} from "../handlers/pipeline.handler";
+import { createPipelineMsg, editPipelineMsg } from "../handlers/pipeline.handler";
 import {
   createPipelineCb,
   getPipelineCb,
@@ -40,36 +33,19 @@ import {
   listPipelinesCb,
 } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/admin.callback";
-import {
-  removePipelineSourceCb,
-  sourceSelectedCb,
-} from "../callbacks/source.callback";
+import { removePipelineSourceCb, sourceSelectedCb } from "../callbacks/source.callback";
 import { addParserMsg, addSourceMsg } from "../handlers/general.handler";
 import { selectedPipelineCb } from "../callbacks/shared_pipeline.callback";
-import {
-  addRegexCmd,
-  getPromptCmd,
-  getRegexesCmd,
-  removeRegexCmd,
-  setPromptCmd,
-} from "../commands/parser.command";
+import { addRegexCmd, getPromptCmd, getRegexesCmd, removeRegexCmd, setPromptCmd } from "../commands/parser.command";
 import { removePipelineRegexCb } from "../callbacks/parser.callback";
 import { addWebSelectorCmd, testWebSourceCmd } from "../commands/web.command";
-import {
-  webConfirmCb,
-  webPipelineCb,
-  webSourceSelectedCb,
-  webTestConfirmCb,
-} from "../callbacks/web.callback";
+import { webConfirmCb, webPipelineCb, webSourceSelectedCb, webTestConfirmCb } from "../callbacks/web.callback";
 import { addWebSelectorMsg } from "../handlers/web.handler";
 import { addBinanceAccountMsg } from "../handlers/binance.handler";
 import { generateTradeInterfaceRegexCmd } from "../commands/generate.command";
 import { generateTradeInterfaceRegexHdlr } from "../handlers/generate.handler";
 
-import {
-  backfillSourceSelectedCb,
-  backfillTypeSelectedCb,
-} from "../callbacks/backfill.callback";
+import { backfillSourceSelectedCb, backfillTypeSelectedCb } from "../callbacks/backfill.callback";
 import { backfillMsgHandler } from "../handlers/backfill.handler";
 
 async function init(fastify: FastifyInstance) {
@@ -102,7 +78,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("backfill", backfillCmd);
 
         bot.action(
-          /^(telegram|x|rss|tg_bot|discord|web|binance):(add|rem|get|get_pip|ping|backfill)$/,
+          /^(telegram|x|rss|tg_bot|discord|web|binance|new_x):(add|rem|get|get_pip|ping|backfill)$/,
           sourceSelectedCb,
         );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
@@ -136,10 +112,7 @@ async function init(fastify: FastifyInstance) {
         bot.action(/^(remove_pipeline):(.+)$/, removePipelineCb);
         bot.action(/^(get_pipeline):(.+)$/, getPipelineCb);
         bot.action(/^(edit_pipeline):(.+)$/, editPipelineCb);
-        bot.action(
-          /^(list_pipelines):(get_pipeline|remove_pipeline|edit_pipeline):(\d+)$/,
-          listPipelinesCb,
-        );
+        bot.action(/^(list_pipelines):(get_pipeline|remove_pipeline|edit_pipeline):(\d+)$/, listPipelinesCb);
         bot.action(/^(selected_pipeline):(.+)$/, selectedPipelineCb); // Shared across parsers and sources
 
         /* Web Selector Section */
