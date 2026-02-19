@@ -1,4 +1,4 @@
-import { bold, code, fmt, join, italic } from "telegraf/format";
+import { bold, code, fmt, join, italic, FmtString } from "telegraf/format";
 import { PingResponse } from "../models/twitter.api";
 
 function getSourcesMessage(msg: string | undefined, sources: string[] | undefined) {
@@ -31,28 +31,44 @@ function formatKey(key: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
+function formatValue(value: any): string {
+  if (value === null || value === undefined) return "N/A";
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "None";
+    if (value.length <= 3) return value.join(", ");
+    return `${value.length} items`;
+  }
+
+  if (typeof value === "object") {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return "Empty Object";
+
+    return entries.map(([k, v]) => `${formatKey(k)}: ${typeof v === "object" ? "{...}" : v}`).join(" | ");
+  }
+
+  return String(value);
+}
 
 function pingMessage(payload: PingResponse) {
   const { success, message, data } = payload;
   const icon = success ? "🟢" : "🔴";
-
   const content = [fmt`${icon} ${bold(message)}`];
 
   if (data && typeof data === "object" && !Array.isArray(data)) {
-    const details = Object.entries(data).map(([key, value]) => {
-      const label = formatKey(key);
-      let displayValue = "N/A";
+    const processEntry = (obj: object, indent = ""): FmtString<"fmt">[] => {
+      return Object.entries(obj).flatMap(([key, value]) => {
+        const label = formatKey(key);
 
-      if (Array.isArray(value)) {
-        if (value.length === 0) displayValue = "None";
-        else if (value.length <= 3) displayValue = value.join(", ");
-        else displayValue = `${value.length} active items`;
-      } else if (value !== null && value !== undefined) {
-        displayValue = String(value);
-      }
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          return [fmt`${indent}• ${bold(label)}:`, ...processEntry(value, indent + "  ")];
+        }
 
-      return fmt`• ${bold(label)}: ${code(displayValue)}`;
-    });
+        return [fmt`${indent}• ${bold(label)}: ${code(formatValue(value))}`];
+      });
+    };
+
+    const details = processEntry(data);
 
     if (details.length > 0) {
       content.push(fmt``);
