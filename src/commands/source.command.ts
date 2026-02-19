@@ -17,8 +17,10 @@ const keyboards = (action: Action) => {
       { text: "Discord", callback_data: `discord:${action}` },
       { text: "Web", callback_data: `web:${action}` },
     ],
-    [{ text: "Binance", callback_data: `binance:${action}` }],
-    [{ text: "New X", callback_data: `new_x:${action}` }],
+    [
+      { text: "Binance", callback_data: `binance:${action}` },
+      { text: "New X", callback_data: `new_x:${action}` },
+    ],
   ];
 };
 
