@@ -42,6 +42,7 @@ import { addWebSelectorCmd, testWebSourceCmd } from "../commands/web.command";
 import { webConfirmCb, webPipelineCb, webSourceSelectedCb, webTestConfirmCb } from "../callbacks/web.callback";
 import { addWebSelectorMsg } from "../handlers/web.handler";
 import { addBinanceAccountMsg } from "../handlers/binance.handler";
+import { binanceTypeSelectedCb } from "../callbacks/binance.callback";
 import { generateTradeInterfaceRegexCmd } from "../commands/generate.command";
 import { generateTradeInterfaceRegexHdlr } from "../handlers/generate.handler";
 
@@ -86,6 +87,7 @@ async function init(fastify: FastifyInstance) {
 
         bot.action(/^(backfill_src):(.+)$/, backfillSourceSelectedCb);
         bot.action(/^(backfill_type):(.+)$/, backfillTypeSelectedCb);
+        bot.action(/^binance_type:(spot|futures|both)$/, binanceTypeSelectedCb);
 
         /* Parser Management Section */
         bot.command("add_regex", addRegexCmd);

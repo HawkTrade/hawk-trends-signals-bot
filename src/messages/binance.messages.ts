@@ -11,4 +11,10 @@ ${bold`Enter your Binance account API Key`}
 const secretMsg = fmt`
 ${bold`Enter the secret key associated with the provided api key`}`;
 
-export { keyMsg, secretMsg };
+const typeMsg = fmt`
+${bold`Select the type of Binance account you want to add`}
+
+${italic`Choose whether this account is for Spot trading, Futures trading, or both`}
+`;
+
+export { keyMsg, secretMsg, typeMsg };

@@ -48,6 +48,7 @@ interface BinanceAccount {
   apiKey: string;
   apiSecret: string;
   name: string;
+  type: "spot" | "futures" | "both";
 }
 
 interface BackfillJob {
@@ -61,11 +62,4 @@ interface BackfillJob {
   sourceType: string;
 }
 
-export type {
-  Pipeline,
-  LocalPipeline,
-  WebData,
-  WebScraperParams,
-  BinanceAccount,
-  BackfillJob,
-};
+export type { Pipeline, LocalPipeline, WebData, WebScraperParams, BinanceAccount, BackfillJob };

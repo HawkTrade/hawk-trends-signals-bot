@@ -2,22 +2,18 @@ import { Context } from "../models/telegraf.model";
 import { BinanceAccount } from "../models/db.model";
 import { errorWrapper } from "../utils/helpers";
 import cache from "../db/cache";
-import { secretMsg } from "../messages/binance.messages";
+import { typeMsg } from "../messages/binance.messages";
 import { HawkApi } from "../utils/fetch";
 import { getDefaultSession, to_delete } from "../utils";
 
 async function _addBinanceAccountMsg(ctx: Context) {
-  if (!ctx.message || !("text" in ctx.message))
-    throw new Error("No message was provided");
+  if (!ctx.message || !("text" in ctx.message)) throw new Error("No message was provided");
 
   const text = ctx.message.text.trim();
   const cacheKey = `binance_account:${ctx.from?.id}`;
 
   let cached = cache.get(cacheKey);
-  if (!cached)
-    throw new Error(
-      "Binance account creation session expired. Please start over."
-    );
+  if (!cached) throw new Error("Binance account creation session expired. Please start over.");
 
   const account: Partial<BinanceAccount> = JSON.parse(cached);
   if (!account.name) throw new Error("Binance Account Name is missing");
@@ -27,7 +23,15 @@ async function _addBinanceAccountMsg(ctx: Context) {
     account.apiKey = text;
     cache.set(cacheKey, JSON.stringify(account));
 
-    const { message_id } = await ctx.reply(secretMsg);
+    const keyboard = [
+      [
+        { text: "Spot", callback_data: "binance_type:spot" },
+        { text: "Futures", callback_data: "binance_type:futures" },
+      ],
+      [{ text: "Both", callback_data: "binance_type:both" }],
+    ];
+
+    const { message_id } = await ctx.reply(typeMsg, { reply_markup: { inline_keyboard: keyboard } });
     ctx.session.toDelete.push(message_id);
   } else if (!account.apiSecret) {
     account.apiSecret = text;
@@ -40,6 +44,8 @@ async function _addBinanceAccountMsg(ctx: Context) {
     await to_delete(ctx);
     ctx.session = getDefaultSession();
     cache.delete(cacheKey);
+  } else if (!account.type) {
+    throw new Error("Account type must be selected via inline keyboard");
   } else throw new Error("How did we get here?");
 }
 
