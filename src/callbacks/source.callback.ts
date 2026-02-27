@@ -172,10 +172,6 @@ async function _removePipelineSourceCb(ctx: Context) {
   ctx.session = getDefaultSession();
 }
 
-const sourceSelectedCb = errorWrapper(_sourceSelectedCb);
-const removePipelineSourceCb = errorWrapper(_removePipelineSourceCb);
-
-// New callback handlers for source control confirmations
 async function _sourceControlConfirmCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
@@ -188,14 +184,15 @@ async function _sourceControlConfirmCb(ctx: Context) {
   await ctx.sendChatAction("typing");
 
   try {
+    console.log({ source, action }, "Calling Ingest API");
+    console.time("Ingest API");
     const { msg, error } = await HawkApi.post(`/source/${source}/${action}`);
+    console.timeEnd("Ingest API");
+    console.log(msg, error, "Res from Ingest api");
     if (error) throw error;
     if (!msg) throw new Error("API response is malformed");
 
-    const actionText = action.charAt(0).toUpperCase() + action.slice(1);
-    const sourceName = source === "telegram" ? "Gram" : source.charAt(0).toUpperCase() + source.slice(1);
-
-    await ctx.reply(fmt`${bold(`${sourceName} source ${actionText}ed successfully!`)}`);
+    await ctx.reply(fmt`${bold(`${msg}`)}`);
   } catch (error) {
     await ctx.reply(fmt`${bold(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)}`);
   }
@@ -205,7 +202,7 @@ async function _sourceControlCancelCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
   const [prefix, source] = ctx.callbackQuery.data.split(":") as [string, Source];
-  const action = prefix.replace("cancel_", "") as "start" | "stop" | "restart";
+  const action = prefix.replace("cancel_", "");
 
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
@@ -217,6 +214,8 @@ async function _sourceControlCancelCb(ctx: Context) {
   await ctx.reply(fmt`${italic(`${actionText} action for ${sourceName} source cancelled.`)}`);
 }
 
+const sourceSelectedCb = errorWrapper(_sourceSelectedCb);
+const removePipelineSourceCb = errorWrapper(_removePipelineSourceCb);
 const sourceControlConfirmCb = errorWrapper(_sourceControlConfirmCb);
 const sourceControlCancelCb = errorWrapper(_sourceControlCancelCb);
 
