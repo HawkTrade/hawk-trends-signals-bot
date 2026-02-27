@@ -179,7 +179,8 @@ const removePipelineSourceCb = errorWrapper(_removePipelineSourceCb);
 async function _sourceControlConfirmCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
-  const [, action, source] = ctx.callbackQuery.data.split(":") as [string, "start" | "stop" | "restart", Source];
+  const [prefix, source] = ctx.callbackQuery.data.split(":") as [string, Source];
+  const action = prefix.replace("confirm_", "") as "start" | "stop" | "restart";
 
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
@@ -203,7 +204,8 @@ async function _sourceControlConfirmCb(ctx: Context) {
 async function _sourceControlCancelCb(ctx: Context) {
   if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
 
-  const [, action, source] = ctx.callbackQuery.data.split(":") as [string, "start" | "stop" | "restart", Source];
+  const [prefix, source] = ctx.callbackQuery.data.split(":") as [string, Source];
+  const action = prefix.replace("cancel_", "") as "start" | "stop" | "restart";
 
   await ctx.answerCbQuery();
   await ctx.deleteMessage();
