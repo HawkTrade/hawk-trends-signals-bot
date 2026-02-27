@@ -14,6 +14,9 @@ import {
   pingCmd,
   pollCmd,
   backfillCmd,
+  startSourceCmd,
+  stopSourceCmd,
+  restartSourceCmd,
 } from "../commands/source.command";
 import { getAdminsCmd, removeAdminCmd, addAdminCmd } from "../commands/admin.command";
 import {
@@ -33,7 +36,12 @@ import {
   listPipelinesCb,
 } from "../callbacks/pipeline.callback";
 import { removeAdminCb } from "../callbacks/admin.callback";
-import { removePipelineSourceCb, sourceSelectedCb } from "../callbacks/source.callback";
+import {
+  removePipelineSourceCb,
+  sourceSelectedCb,
+  sourceControlConfirmCb,
+  sourceControlCancelCb,
+} from "../callbacks/source.callback";
 import { addParserMsg, addSourceMsg } from "../handlers/general.handler";
 import { selectedPipelineCb } from "../callbacks/shared_pipeline.callback";
 import { addRegexCmd, getPromptCmd, getRegexesCmd, removeRegexCmd, setPromptCmd } from "../commands/parser.command";
@@ -77,13 +85,18 @@ async function init(fastify: FastifyInstance) {
         bot.command("ping", pingCmd);
         bot.command("poll", pollCmd);
         bot.command("backfill", backfillCmd);
+        bot.command("start_source", startSourceCmd);
+        bot.command("stop_source", stopSourceCmd);
+        bot.command("restart_source", restartSourceCmd);
 
         bot.action(
-          /^(telegram|x|rss|tg_bot|discord|web|binance|new_x):(add|rem|get|get_pip|ping|backfill)$/,
+          /^(telegram|x|rss|tg_bot|discord|web|binance|new_x):(add|rem|get|get_pip|ping|backfill|start|stop|restart)$/,
           sourceSelectedCb,
         );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
         bot.action(/^(rem_rgx):(.+)$/, removePipelineRegexCb);
+        bot.action(/^(confirm_start|confirm_stop|confirm_restart):(.+)$/, sourceControlConfirmCb);
+        bot.action(/^(cancel_start|cancel_stop|cancel_restart):(.+)$/, sourceControlCancelCb);
 
         bot.action(/^(backfill_src):(.+)$/, backfillSourceSelectedCb);
         bot.action(/^(backfill_type):(.+)$/, backfillTypeSelectedCb);

@@ -46,10 +46,12 @@ const botCommands: BotCommand[] = [
   },
   {
     command: "generate_regex",
-    description:
-      "Generate a new regex pattern by passing in an example content",
+    description: "Generate a new regex pattern by passing in an example content",
   },
   { command: "backfill", description: "Request a backfill for a source" },
+  { command: "start_source", description: "Start a data source" },
+  { command: "stop_source", description: "Stop a data source" },
+  { command: "restart_source", description: "Restart a data source" },
   { command: "help", description: "Show this help message" },
 ];
 

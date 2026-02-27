@@ -30,6 +30,26 @@ async function _sourceSelectedCb(ctx: Context) {
     return;
   }
 
+  if (action === "start" || action === "stop" || action === "restart") {
+    const sourceName = source === "telegram" ? "Gram" : source.charAt(0).toUpperCase() + source.slice(1);
+
+    const { message_id } = await ctx.reply(
+      fmt`${bold(`Are you sure you wish to ${action} the ${sourceName} source?`)}`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "Yes", callback_data: `confirm_${action}:${source}` },
+              { text: "No", callback_data: `cancel_${action}:${source}` },
+            ],
+          ],
+        },
+      },
+    );
+    ctx.session.toDelete.push(message_id);
+    return;
+  }
+
   if (action === "get" && !pipeline) {
     const { data, msg, error } = await HawkApi.get<HawkApiResponse<DataSource>>("/source/" + source);
     if (error) throw error;
@@ -155,10 +175,55 @@ async function _removePipelineSourceCb(ctx: Context) {
 const sourceSelectedCb = errorWrapper(_sourceSelectedCb);
 const removePipelineSourceCb = errorWrapper(_removePipelineSourceCb);
 
+// New callback handlers for source control confirmations
+async function _sourceControlConfirmCb(ctx: Context) {
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
+
+  const [, action, source] = ctx.callbackQuery.data.split(":") as [string, "start" | "stop" | "restart", Source];
+
+  await ctx.answerCbQuery();
+  await ctx.deleteMessage();
+  await to_delete(ctx);
+  await ctx.sendChatAction("typing");
+
+  try {
+    const { msg, error } = await HawkApi.post(`/source/${source}/${action}`);
+    if (error) throw error;
+    if (!msg) throw new Error("API response is malformed");
+
+    const actionText = action.charAt(0).toUpperCase() + action.slice(1);
+    const sourceName = source === "telegram" ? "Gram" : source.charAt(0).toUpperCase() + source.slice(1);
+
+    await ctx.reply(fmt`${bold(`${sourceName} source ${actionText}ed successfully!`)}`);
+  } catch (error) {
+    await ctx.reply(fmt`${bold(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)}`);
+  }
+}
+
+async function _sourceControlCancelCb(ctx: Context) {
+  if (!ctx.callbackQuery || !("data" in ctx.callbackQuery)) throw new Error("Callback Query data is empty");
+
+  const [, action, source] = ctx.callbackQuery.data.split(":") as [string, "start" | "stop" | "restart", Source];
+
+  await ctx.answerCbQuery();
+  await ctx.deleteMessage();
+  await to_delete(ctx);
+
+  const actionText = action.charAt(0).toUpperCase() + action.slice(1);
+  const sourceName = source === "telegram" ? "Gram" : source.charAt(0).toUpperCase() + source.slice(1);
+
+  await ctx.reply(fmt`${italic(`${actionText} action for ${sourceName} source cancelled.`)}`);
+}
+
+const sourceControlConfirmCb = errorWrapper(_sourceControlConfirmCb);
+const sourceControlCancelCb = errorWrapper(_sourceControlCancelCb);
+
 export {
   sourceSelectedCb,
   removePipelineSourceCb,
   addPipelineSourceCb_,
   getPipelineSourceCb_,
   removePipelineSourceCb_,
+  sourceControlConfirmCb,
+  sourceControlCancelCb,
 };
