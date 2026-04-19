@@ -89,7 +89,7 @@ async function addPipelineSourceCb_(ctx: Context, source: Source) {
             ? "blog URL"
             : source === "binance"
               ? "Name for the Binance account, no spaces (e.g ProTrader)"
-              : source === "x" || source === "new_x"
+              : source === "x"
                 ? "X username"
                 : source === "telegram"
                   ? "Channel username"

@@ -90,7 +90,7 @@ async function init(fastify: FastifyInstance) {
         bot.command("restart_source", restartSourceCmd);
 
         bot.action(
-          /^(telegram|x|rss|tg_bot|discord|web|binance|new_x):(add|rem|get|get_pip|ping|backfill|start|stop|restart)$/,
+          /^(telegram|x|rss|tg_bot|discord|web|binance):(add|rem|get|get_pip|ping|backfill|start|stop|restart)$/,
           sourceSelectedCb,
         );
         bot.action(/^(rem_src):(.+)$/, removePipelineSourceCb);
